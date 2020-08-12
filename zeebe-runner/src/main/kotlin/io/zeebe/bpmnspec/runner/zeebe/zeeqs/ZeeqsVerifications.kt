@@ -9,15 +9,13 @@ import java.net.http.HttpClient
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
 
-class ZeeqsVerifications {
+class ZeeqsVerifications(val zeeqsEndpoint: String = "http://localhost:9000/graphql") {
 
     val logger = LoggerFactory.getLogger(ZeeqsVerifications::class.java)
 
     val httpClient = HttpClient.newHttpClient()
 
     val objectMapper = ObjectMapper().registerModule(KotlinModule())
-
-    val graphqlUrl = "http://localhost:9000/graphql"
 
     fun getWorkflowInstanceState(workflowInstanceKey: Long): String {
 
@@ -31,7 +29,7 @@ class ZeeqsVerifications {
         val requestBody = HttpRequest.BodyPublishers.ofString("""{ "query": "$query" }""")
 
         val request = HttpRequest.newBuilder()
-                .uri(URI.create(graphqlUrl))
+                .uri(URI.create("http://$zeeqsEndpoint"))
                 .header("Content-Type", "application/json")
                 .POST(requestBody)
                 .build()

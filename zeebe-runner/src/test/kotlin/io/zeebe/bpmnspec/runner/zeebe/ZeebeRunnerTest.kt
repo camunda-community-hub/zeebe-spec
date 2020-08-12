@@ -13,6 +13,8 @@ class ZeebeRunnerTest {
 
         val runner = ZeebeRunner()
 
+        runner.init()
+
         val bpmnXml = ZeebeRunnerTest::class.java.getResourceAsStream("/demo.bpmn")
         runner.deployWorkflow("demo.bpmn", bpmnXml)
 
