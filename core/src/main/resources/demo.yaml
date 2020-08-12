@@ -1,0 +1,27 @@
+resources:
+  - demo.bpmn
+
+test-cases:
+  - name: complete workflow
+    description: first test
+    actions:
+      - action: create-instance
+        args:
+          bpmn_process_id: demo
+          variables: '{}'
+      - action: complete-task
+        args:
+          job_type: a
+          variables: '{}'
+      - action: complete-task
+          args:
+            job_type: b
+            variables: '{}'
+      - action: complete-task
+          args:
+            job_type: c
+            variables: '{}'
+    verifications:
+      - verification: workflow-instance-completed
+        args:
+          bpmn_process_id: demo
