@@ -16,14 +16,14 @@ class ZeebeRunnerTest {
         val bpmnXml = ZeebeRunnerTest::class.java.getResourceAsStream("/demo.bpmn")
         runner.deployWorkflow("demo.bpmn", bpmnXml)
 
-        runner.createWorkflowInstance("demo", "{}")
+        val wfContext = runner.createWorkflowInstance("demo", "{}")
 
         runner.completeTask("a", "{}")
         runner.completeTask("b", "{}")
         runner.completeTask("c", "{}")
 
         await.untilAsserted {
-            assertThat(runner.getWorkflowInstanceState("demo"))
+            assertThat(runner.getWorkflowInstanceState(wfContext))
                     .isEqualTo(WorkflowInstanceState.COMPLETED)
         }
 

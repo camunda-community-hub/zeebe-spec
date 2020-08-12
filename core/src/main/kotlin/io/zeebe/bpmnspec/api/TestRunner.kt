@@ -11,10 +11,10 @@ interface TestRunner {
 
     fun deployWorkflow(name: String, bpmnXml: InputStream)
 
-    fun createWorkflowInstance(bpmnProcessId: String, variables: String)
+    fun createWorkflowInstance(bpmnProcessId: String, variables: String): WorkflowInstanceContext
 
     fun completeTask(jobType: String, variables: String)
 
-    fun getWorkflowInstanceState(bpmnProcessId: String): WorkflowInstanceState
+    fun getWorkflowInstanceState(context: WorkflowInstanceContext): WorkflowInstanceState
 
 }

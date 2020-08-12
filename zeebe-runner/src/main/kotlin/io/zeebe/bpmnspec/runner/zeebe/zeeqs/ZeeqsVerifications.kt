@@ -19,14 +19,12 @@ class ZeeqsVerifications {
 
     val graphqlUrl = "http://localhost:9000/graphql"
 
-    fun getWorkflowInstanceState(bpmnProcessId: String): String {
+    fun getWorkflowInstanceState(workflowInstanceKey: Long): String {
 
-        val responseBody = sendRequest("{ workflowInstances { nodes { key, state } } }")
-        val data = objectMapper.readValue<WorkflowInstanceResponse>(responseBody)
+        val responseBody = sendRequest("{ workflowInstance(key: $workflowInstanceKey) { state } }")
+        val response = objectMapper.readValue<WorkflowInstanceResponse>(responseBody)
 
-        val states = data.data.workflowInstances.nodes.map { it.state }
-
-        return states.distinct().takeIf { it.size == 1 }?.get(0) ?: "unknown"
+        return response.data.workflowInstance.state
     }
 
     private fun sendRequest(query: String): String {
@@ -55,12 +53,14 @@ class ZeeqsVerifications {
         return responseBody
     }
 
-    data class WorkflowInstanceResponse(val data: WorkflowInstancesDataDto)
+    data class WorkflowInstanceResponse(val data: WorkflowInstanceDataDto)
 
     data class WorkflowInstancesDataDto(val workflowInstances: WorkflowInstancesDto)
 
     data class WorkflowInstancesDto(val nodes: List<WorkflowInstanceDto>)
 
-    data class WorkflowInstanceDto(val key: Long, val state: String)
+    data class WorkflowInstanceDataDto(val workflowInstance: WorkflowInstanceDto)
+
+    data class WorkflowInstanceDto(val state: String)
 
 }

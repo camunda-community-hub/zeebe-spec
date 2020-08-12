@@ -2,8 +2,10 @@ resources:
   - demo.bpmn
 
 test-cases:
+  -
   - name: complete workflow
     description: first test
+
     actions:
       - action: create-instance
         args:
@@ -21,6 +23,7 @@ test-cases:
           args:
             job_type: c
             variables: '{}'
+
     verifications:
       - verification: workflow-instance-completed
         args:

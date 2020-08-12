@@ -1,6 +1,7 @@
 package io.zeebe.bpmnspec.runner.zeebe
 
 import io.zeebe.bpmnspec.api.TestRunner
+import io.zeebe.bpmnspec.api.WorkflowInstanceContext
 import io.zeebe.bpmnspec.api.runner.WorkflowInstanceState
 import io.zeebe.bpmnspec.runner.zeebe.zeeqs.ZeeqsVerifications
 import io.zeebe.client.ZeebeClient
@@ -39,12 +40,16 @@ class ZeebeRunner : TestRunner {
                 .join()
     }
 
-    override fun createWorkflowInstance(bpmnProcessId: String, variables: String) {
-        client.newCreateInstanceCommand()
+    override fun createWorkflowInstance(bpmnProcessId: String, variables: String): WorkflowInstanceContext {
+        val response = client.newCreateInstanceCommand()
                 .bpmnProcessId(bpmnProcessId)
                 .latestVersion().variables(variables)
                 .send()
                 .join()
+
+        return ZeebeWorkflowInstanceContext(
+                workflowInstanceKey = response.workflowInstanceKey
+        )
     }
 
     override fun completeTask(jobType: String, variables: String) {
@@ -60,9 +65,11 @@ class ZeebeRunner : TestRunner {
                 .open()
     }
 
-    override fun getWorkflowInstanceState(bpmnProcessId: String): WorkflowInstanceState {
+    override fun getWorkflowInstanceState(context: WorkflowInstanceContext): WorkflowInstanceState {
 
-        val state = zeeqsVerifications.getWorkflowInstanceState(bpmnProcessId)
+        val wfContext = context as ZeebeWorkflowInstanceContext
+
+        val state = zeeqsVerifications.getWorkflowInstanceState(wfContext.workflowInstanceKey)
         return when (state) {
             "COMPLETED" -> WorkflowInstanceState.COMPLETED
             "TERMINATED" -> WorkflowInstanceState.TERMINATED
