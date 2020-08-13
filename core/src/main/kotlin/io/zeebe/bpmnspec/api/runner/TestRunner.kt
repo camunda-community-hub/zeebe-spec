@@ -20,6 +20,8 @@ interface TestRunner {
 
     fun throwError(jobType: String, errorCode: String, errorMessage: String)
 
+    fun cancelWorkflowInstance(context: WorkflowInstanceContext)
+
     fun getWorkflowInstanceContexts(): List<WorkflowInstanceContext>
 
     fun getWorkflowInstanceState(context: WorkflowInstanceContext): WorkflowInstanceState

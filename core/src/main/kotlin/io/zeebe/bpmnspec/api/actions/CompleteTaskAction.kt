@@ -9,8 +9,7 @@ class CompleteTaskAction(
         val variables: String
 ) : Action {
 
-    override fun execute(runner: TestRunner): Pair<String, WorkflowInstanceContext>? {
+    override fun execute(runner: TestRunner, contexts: MutableMap<String, WorkflowInstanceContext>) {
         runner.completeTask(jobType, variables)
-        return null
     }
 }

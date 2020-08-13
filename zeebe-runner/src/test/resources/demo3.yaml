@@ -9,6 +9,7 @@ testCases:
         args:
           bpmn_process_id: demo2
           variables: '{"key":"key-1"}'
+          workflow_instance_alias: wf-1
       - action: publish-message
         args:
           message_name: message-1

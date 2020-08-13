@@ -1,9 +1,6 @@
 package io.zeebe.bpmnspec
 
-import io.zeebe.bpmnspec.api.TestCase
-import io.zeebe.bpmnspec.api.TestResult
-import io.zeebe.bpmnspec.api.TestSpecResult
-import io.zeebe.bpmnspec.api.VerificationResult
+import io.zeebe.bpmnspec.api.*
 import io.zeebe.bpmnspec.api.runner.TestRunner
 import io.zeebe.bpmnspec.format.SpecDeserializer
 import org.slf4j.LoggerFactory
@@ -60,11 +57,13 @@ class SpecRunner(
 
     private fun runTestCase(testcase: TestCase): TestResult {
 
-        val contexts = testcase.actions.map { it.execute(testRunner) }
-                .filterNotNull()
-                .takeIf { !it.isEmpty() }
-                ?.toMap()
-                ?: testRunner.getWorkflowInstanceContexts().map { Pair("unnamed", it) }.toMap()
+        val contexts = mutableMapOf<String, WorkflowInstanceContext>()
+
+        testcase.actions.forEach { it.execute(testRunner, contexts) }
+
+        if (contexts.isEmpty()) {
+            contexts.putAll(testRunner.getWorkflowInstanceContexts().map { Pair("unnamed", it) }.toMap())
+        }
 
         val start = Instant.now()
 

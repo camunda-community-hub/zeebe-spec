@@ -4,10 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.fasterxml.jackson.module.kotlin.readValue
-import io.zeebe.bpmnspec.api.actions.CompleteTaskAction
-import io.zeebe.bpmnspec.api.actions.CreateInstanceAction
-import io.zeebe.bpmnspec.api.actions.PublishMessageAction
-import io.zeebe.bpmnspec.api.actions.ThrowErrorAction
+import io.zeebe.bpmnspec.api.actions.*
 import io.zeebe.bpmnspec.api.runner.WorkflowInstanceState
 import io.zeebe.bpmnspec.api.verifications.WorkflowInstanceStateVerification
 import java.io.InputStream
@@ -62,6 +59,9 @@ class SpecDeserializer {
                     errorCode = args["error_code"]
                             ?: throw RuntimeException("Missing required parameter 'error_code' for action 'throw-error'"),
                     errorMessage = args["error_message"] ?: ""
+            )
+            "cancel-instance" -> CancelInstanceAction(
+                    workflowInstance = args["workflow_instance"]
             )
             else -> throw RuntimeException("Unknown action '$name'")
         }

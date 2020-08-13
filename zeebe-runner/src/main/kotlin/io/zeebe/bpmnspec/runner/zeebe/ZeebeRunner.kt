@@ -159,6 +159,16 @@ class ZeebeRunner : TestRunner {
                 .open()
     }
 
+    override fun cancelWorkflowInstance(context: WorkflowInstanceContext) {
+        val wfContext = context as ZeebeWorkflowInstanceContext
+
+        logger.debug("Cancelling a workflow instance. [key: {}]", wfContext.workflowInstanceKey)
+
+        client.newCancelInstanceCommand(wfContext.workflowInstanceKey)
+                .send()
+                .join()
+    }
+
     override fun getWorkflowInstanceContexts(): List<WorkflowInstanceContext> {
 
         return zeeqsVerifications.getWorkflowInstanceKeys()

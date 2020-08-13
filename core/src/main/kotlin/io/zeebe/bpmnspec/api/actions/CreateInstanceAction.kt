@@ -10,12 +10,10 @@ class CreateInstanceAction(
         val workflowInstanceAlias: String?
 ) : Action {
 
-    override fun execute(runner: TestRunner): Pair<String, WorkflowInstanceContext>? {
+    override fun execute(runner: TestRunner, contexts: MutableMap<String, WorkflowInstanceContext>) {
         val context = runner.createWorkflowInstance(bpmnProcessId, variables)
 
-        return Pair(
-                workflowInstanceAlias ?: bpmnProcessId,
-                context
-        )
+        val alias = workflowInstanceAlias ?: bpmnProcessId
+        contexts.put(alias, context)
     }
 }
