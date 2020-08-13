@@ -115,9 +115,9 @@ class ZeebeRunner : TestRunner {
     }
 
     override fun completeTask(jobType: String, variables: String) {
-        logger.debug("Starting a job worker. [job-type: {}, variables: {}]", jobType, variables)
+        logger.debug("Starting a job worker to complete jobs. [job-type: {}, variables: {}]", jobType, variables)
 
-        val jobWorker = client.newWorker()
+        client.newWorker()
                 .jobType(jobType)
                 .handler { jobClient, job ->
                     jobClient.newCompleteCommand(job.key)
@@ -140,6 +140,23 @@ class ZeebeRunner : TestRunner {
                 .timeToLive(Duration.ofSeconds(10))
                 .send()
                 .join()
+    }
+
+    override fun throwError(jobType: String, errorCode: String, errorMessage: String) {
+        logger.debug("Starting a job worker to throw errors. [job-type: {}, error-code: {}, error-message: {}]",
+                jobType, errorCode, errorMessage)
+
+        client.newWorker()
+                .jobType(jobType)
+                .handler { jobClient, job ->
+                    jobClient.newThrowErrorCommand(job.key)
+                            .errorCode(errorCode)
+                            .errorMessage(errorMessage)
+                            .send()
+                            .join()
+                }
+                .timeout(Duration.ofSeconds(1))
+                .open()
     }
 
     override fun getWorkflowInstanceContexts(): List<WorkflowInstanceContext> {

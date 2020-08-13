@@ -18,6 +18,8 @@ interface TestRunner {
 
     fun publishMessage(messageName: String, correlationKey: String, variables: String)
 
+    fun throwError(jobType: String, errorCode: String, errorMessage: String)
+
     fun getWorkflowInstanceContexts(): List<WorkflowInstanceContext>
 
     fun getWorkflowInstanceState(context: WorkflowInstanceContext): WorkflowInstanceState

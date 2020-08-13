@@ -14,9 +14,13 @@ testCases:
           message_name: message-1
           correlation_key: key-1
           variables: '{}'
-      - action: complete-task
+      - action: throw-error
         args:
           job_type: b
+          error_code: error-1
+      - action: complete-task
+        args:
+          job_type: c
           variables: '{}'
 
     verifications:
