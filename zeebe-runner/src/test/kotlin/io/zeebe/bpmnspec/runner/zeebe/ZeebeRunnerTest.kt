@@ -1,6 +1,6 @@
 package io.zeebe.bpmnspec.runner.zeebe
 
-import io.zeebe.bpmnspec.Runner
+import io.zeebe.bpmnspec.SpecRunner
 import io.zeebe.bpmnspec.api.runner.WorkflowInstanceState
 import org.assertj.core.api.Assertions.assertThat
 import org.awaitility.kotlin.await
@@ -39,7 +39,7 @@ class ZeebeRunnerTest {
         val classpathDir = ZeebeRunnerTest::class.java.getResource("/demo.yaml")
         val classpath = Path.of(classpathDir.toURI()).parent
 
-        val runner = Runner(
+        val runner = SpecRunner(
                 testRunner = ZeebeRunner(),
                 resourceDirectory = classpath)
 

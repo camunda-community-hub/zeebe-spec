@@ -7,14 +7,15 @@ import java.io.InputStream
 import java.nio.file.Path
 import java.time.Duration
 import java.time.Instant
-import kotlin.math.log
 
-class Runner(
+class SpecRunner(
         val testRunner: TestRunner,
         val resourceDirectory: Path = Path.of("."),
-        val verificationTimeout: Duration = Duration.ofSeconds(10)) {
+        val verificationTimeout: Duration = Duration.ofSeconds(10),
+        val verificationRetryInterval: Duration = Duration.ofMillis(10)
+) {
 
-    val logger = LoggerFactory.getLogger(Runner::class.java)
+    val logger = LoggerFactory.getLogger(SpecRunner::class.java)
 
     val specDeserializer = SpecDeserializer()
 
@@ -66,7 +67,14 @@ class Runner(
             var result: VerificationResult
             do {
                 result = verification.verify(testRunner, context)
-            } while (!result.isFulfilled && Duration.between(start, Instant.now()).minus(verificationTimeout).isNegative)
+
+                val shouldRetry = !result.isFulfilled &&
+                        Duration.between(start, Instant.now()).minus(verificationTimeout).isNegative
+
+                if (shouldRetry) {
+                    Thread.sleep(verificationRetryInterval.toMillis())
+                }
+            } while (shouldRetry)
 
             if (!result.isFulfilled) {
                 return TestResult(
