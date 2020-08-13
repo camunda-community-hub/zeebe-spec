@@ -1,6 +1,6 @@
 package io.zeebe.bpmnspec.runner.zeebe
 
-import io.zeebe.bpmnspec.api.TestRunner
+import io.zeebe.bpmnspec.api.runner.TestRunner
 import io.zeebe.bpmnspec.api.WorkflowInstanceContext
 import io.zeebe.bpmnspec.api.runner.WorkflowInstanceState
 import io.zeebe.bpmnspec.runner.zeebe.zeeqs.ZeeqsVerifications
@@ -11,7 +11,6 @@ import org.slf4j.LoggerFactory
 import org.testcontainers.containers.BindMode
 import org.testcontainers.containers.GenericContainer
 import org.testcontainers.containers.Network
-import org.testcontainers.containers.output.Slf4jLogConsumer
 import org.testcontainers.containers.wait.strategy.Wait
 import org.testcontainers.utility.MountableFile
 import java.io.InputStream
@@ -129,6 +128,12 @@ class ZeebeRunner : TestRunner {
                 .timeout(Duration.ofSeconds(1))
                 .open()
             }
+
+    override fun getWorkflowInstanceContexts(): List<WorkflowInstanceContext> {
+
+        return zeeqsVerifications.getWorkflowInstanceKeys()
+                .map { ZeebeWorkflowInstanceContext(workflowInstanceKey = it) }
+    }
 
     override fun getWorkflowInstanceState(context: WorkflowInstanceContext): WorkflowInstanceState {
 

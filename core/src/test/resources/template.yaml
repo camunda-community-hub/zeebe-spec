@@ -11,6 +11,7 @@ testCases:
         args:
           bpmn_process_id: demo
           variables: '{}'
+          workflow_instance_alias: wf-1
       - action: complete-task
         args:
           job_type: a
@@ -26,35 +27,23 @@ testCases:
           error_code: err-0
       - action: cancel-instance
         args:
-          bpmn_process_id: demo
-    - action: time-travel
+          workflow_instance: wf-1
+      - action: time-travel
         args:
           fast_forward: PT10M
 
     verifications:
-      - verification: workflow-instance-completed
-      - verification: workflow-instance-terminated
       - verification: workflow-instance-state
         args:
           state: activated|completed|terminated
-          bpmn_process_id: demo
+          workflow_instance: wf-1
 
-      - verification: element-instance-activated
-        args:
-          element_name: task-a
-      - verification: element-instance-completed
-        args:
-          element_id: task-b
-      - verification: element-instance-terminated
-        args:
-          element_name: task-c
-          bpmn_process_id: demo
       - verification: element-instance-state
         args:
           state: activated|completed|terminated
           element_name: task-a
           element_id: service-task-1
-          bpmn_process_id: demo
+          workflow_instance: wf-1
 
       - verification: workflow-instance-variable-created
         args:
@@ -81,11 +70,11 @@ testCases:
           error_message: bla
           element_id: task-a
           element_name: task-1
-          bpmn_process_id: demo
+          workflow_instance: wf-1
 
       - verification: no-incident-created
         args:
-          bpmn_process_id: demo
+          workflow_instance: wf-1
 
 
 

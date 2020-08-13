@@ -41,7 +41,8 @@ class SpecDeserializer {
             "create-instance" -> CreateInstanceAction(
                     bpmnProcessId = args["bpmn_process_id"]
                             ?: throw RuntimeException("Missing required parameter 'bpmn_process_id' for action 'create-instance'"),
-                    variables = args["variables"] ?: "{}"
+                    variables = args["variables"] ?: "{}",
+                    workflowInstanceAlias = args["workflow_instance_alias"]
             )
             "complete-task" -> CompleteTaskAction(
                     jobType = args["job_type"]
@@ -60,7 +61,7 @@ class SpecDeserializer {
             "workflow-instance-state" -> WorkflowInstanceStateVerification(
                     state = args["state"]?.let { WorkflowInstanceState.valueOf(it.toUpperCase()) }
                             ?: throw RuntimeException("Missing required parameter 'state' for verification 'workflow-instance-state'"),
-                    bpmnProcessId = args["bpmn_process_id"]
+                    workflowInstance = args["workflow_instance"]
             )
             else -> throw RuntimeException("Unknown verification: '$name'")
         }

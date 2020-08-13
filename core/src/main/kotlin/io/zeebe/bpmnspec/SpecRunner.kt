@@ -1,6 +1,10 @@
 package io.zeebe.bpmnspec
 
-import io.zeebe.bpmnspec.api.*
+import io.zeebe.bpmnspec.api.TestCase
+import io.zeebe.bpmnspec.api.TestResult
+import io.zeebe.bpmnspec.api.TestSpecResult
+import io.zeebe.bpmnspec.api.VerificationResult
+import io.zeebe.bpmnspec.api.runner.TestRunner
 import io.zeebe.bpmnspec.format.SpecDeserializer
 import org.slf4j.LoggerFactory
 import java.io.InputStream
@@ -56,9 +60,11 @@ class SpecRunner(
 
     private fun runTestCase(testcase: TestCase): TestResult {
 
-        val context = testcase.actions.map { it.execute(testRunner) }
+        val contexts = testcase.actions.map { it.execute(testRunner) }
                 .filterNotNull()
-                .first()
+                .takeIf { !it.isEmpty() }
+                ?.toMap()
+                ?: testRunner.getWorkflowInstanceContexts().map { Pair("unnamed", it) }.toMap()
 
         val start = Instant.now()
 
@@ -66,7 +72,7 @@ class SpecRunner(
 
             var result: VerificationResult
             do {
-                result = verification.verify(testRunner, context)
+                result = verification.verify(testRunner, contexts)
 
                 val shouldRetry = !result.isFulfilled &&
                         Duration.between(start, Instant.now()).minus(verificationTimeout).isNegative

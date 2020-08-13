@@ -17,9 +17,17 @@ class ZeeqsVerifications(val zeeqsEndpoint: String = "http://localhost:9000/grap
 
     val objectMapper = ObjectMapper().registerModule(KotlinModule())
 
+    fun getWorkflowInstanceKeys(): List<Long> {
+
+        val responseBody = sendRequest("{ workflowInstances { nodes  { key, state } } }")
+        val response = objectMapper.readValue<WorkflowInstancesResponse>(responseBody)
+
+        return response.data.workflowInstances.nodes.map { it.key.toLong()  }
+    }
+
     fun getWorkflowInstanceState(workflowInstanceKey: Long): String {
 
-        val responseBody = sendRequest("{ workflowInstance(key: $workflowInstanceKey) { state } }")
+        val responseBody = sendRequest("{ workflowInstance(key: $workflowInstanceKey) { key, state } }")
         val response = objectMapper.readValue<WorkflowInstanceResponse>(responseBody)
 
         return response.data.workflowInstance.state
@@ -53,12 +61,14 @@ class ZeeqsVerifications(val zeeqsEndpoint: String = "http://localhost:9000/grap
 
     data class WorkflowInstanceResponse(val data: WorkflowInstanceDataDto)
 
+    data class WorkflowInstanceDataDto(val workflowInstance: WorkflowInstanceDto)
+
+    data class WorkflowInstanceDto(val key: String, val state: String)
+
     data class WorkflowInstancesDataDto(val workflowInstances: WorkflowInstancesDto)
 
     data class WorkflowInstancesDto(val nodes: List<WorkflowInstanceDto>)
 
-    data class WorkflowInstanceDataDto(val workflowInstance: WorkflowInstanceDto)
-
-    data class WorkflowInstanceDto(val state: String)
+    data class WorkflowInstancesResponse(val data: WorkflowInstancesDataDto)
 
 }

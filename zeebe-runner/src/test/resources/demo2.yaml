@@ -10,6 +10,12 @@ testCases:
         args:
           bpmn_process_id: demo
           variables: '{}'
+          workflow_instance_alias: wf-1
+      - action: create-instance
+        args:
+          bpmn_process_id: demo
+          variables: '{}'
+          workflow_instance_alias: wf-2
       - action: complete-task
         args:
           job_type: a
@@ -27,4 +33,8 @@ testCases:
       - verification: workflow-instance-state
         args:
           state: completed
-
+          workflow_instance: wf-1
+      - verification: workflow-instance-state
+        args:
+          state: terminated
+          workflow_instance: wf-2
