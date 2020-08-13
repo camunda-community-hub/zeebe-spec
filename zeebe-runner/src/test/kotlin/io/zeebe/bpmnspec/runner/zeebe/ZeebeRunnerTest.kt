@@ -1,15 +1,16 @@
 package io.zeebe.bpmnspec.runner.zeebe
 
+import io.zeebe.bpmnspec.Runner
 import io.zeebe.bpmnspec.api.runner.WorkflowInstanceState
 import org.assertj.core.api.Assertions.assertThat
 import org.awaitility.kotlin.await
-import org.awaitility.kotlin.untilAsserted
 import org.junit.jupiter.api.Test
+import java.nio.file.Path
 
 class ZeebeRunnerTest {
 
     @Test
-    fun `should work`() {
+    fun `ZeebeRunner should work standalone`() {
 
         val runner = ZeebeRunner()
 
@@ -30,6 +31,22 @@ class ZeebeRunnerTest {
         }
 
         runner.cleanUp()
+    }
+
+    @Test
+    fun `Runner with ZeebeTestRunner should run the spec`() {
+
+        val classpathDir = ZeebeRunnerTest::class.java.getResource("/demo.yaml")
+        val classpath = Path.of(classpathDir.toURI()).parent
+
+        val runner = Runner(
+                testRunner = ZeebeRunner(),
+                resourceDirectory = classpath)
+
+        val spec = ZeebeRunnerTest::class.java.getResourceAsStream("/demo.yaml")
+        val result = runner.run(spec)
+
+        assertThat(result.testResults).hasSize(1)
     }
 
 }

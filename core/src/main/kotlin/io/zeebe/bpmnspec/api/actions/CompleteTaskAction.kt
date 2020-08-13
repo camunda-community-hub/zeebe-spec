@@ -1,8 +1,16 @@
 package io.zeebe.bpmnspec.api.actions
 
 import io.zeebe.bpmnspec.api.Action
+import io.zeebe.bpmnspec.api.TestRunner
+import io.zeebe.bpmnspec.api.WorkflowInstanceContext
 
-data class CompleteTaskAction(
+class CompleteTaskAction(
         val jobType: String,
         val variables: String
-) : Action
+) : Action {
+
+    override fun execute(runner: TestRunner): WorkflowInstanceContext? {
+        runner.completeTask(jobType, variables)
+        return null
+    }
+}

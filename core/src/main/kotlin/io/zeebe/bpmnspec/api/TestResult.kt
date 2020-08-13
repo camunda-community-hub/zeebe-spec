@@ -1,6 +1,7 @@
 package io.zeebe.bpmnspec.api
 
-class TestResult {
-
-
-}
+data class TestResult(
+        val testCase: TestCase,
+        val success: Boolean,
+        val message: String
+)

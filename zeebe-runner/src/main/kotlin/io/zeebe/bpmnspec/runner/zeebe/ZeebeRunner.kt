@@ -93,6 +93,8 @@ class ZeebeRunner : TestRunner {
     }
 
     override fun deployWorkflow(name: String, bpmnXml: InputStream) {
+        logger.debug("Deploying a BPMN. [name: {}]", name)
+
         client.newDeployCommand()
                 .addResourceStream(bpmnXml, name)
                 .send()
@@ -100,6 +102,8 @@ class ZeebeRunner : TestRunner {
     }
 
     override fun createWorkflowInstance(bpmnProcessId: String, variables: String): WorkflowInstanceContext {
+        logger.debug("Creating a workflow instance. [BPMN-process-id: {}, variables: {}]", bpmnProcessId, variables)
+
         val response = client.newCreateInstanceCommand()
                 .bpmnProcessId(bpmnProcessId)
                 .latestVersion().variables(variables)
@@ -112,6 +116,8 @@ class ZeebeRunner : TestRunner {
     }
 
     override fun completeTask(jobType: String, variables: String) {
+        logger.debug("Starting a job worker. [job-type: {}, variables: {}]", jobType, variables)
+
         val jobWorker = client.newWorker()
                 .jobType(jobType)
                 .handler { jobClient, job ->
