@@ -1,12 +1,12 @@
 package io.zeebe.bpmnspec
 
 import io.zeebe.bpmnspec.api.TestResult
-import io.zeebe.bpmnspec.api.TestSpec
+import io.zeebe.bpmnspec.api.TestCase
 
 interface Runner {
 
     fun init()
 
-    fun run(test: TestSpec): TestResult
+    fun run(test: TestCase): TestResult
 
 }
