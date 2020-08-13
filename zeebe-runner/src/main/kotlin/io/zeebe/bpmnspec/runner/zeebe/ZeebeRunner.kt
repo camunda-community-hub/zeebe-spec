@@ -1,7 +1,7 @@
 package io.zeebe.bpmnspec.runner.zeebe
 
-import io.zeebe.bpmnspec.api.runner.TestRunner
 import io.zeebe.bpmnspec.api.WorkflowInstanceContext
+import io.zeebe.bpmnspec.api.runner.TestRunner
 import io.zeebe.bpmnspec.api.runner.WorkflowInstanceState
 import io.zeebe.bpmnspec.runner.zeebe.zeeqs.ZeeqsVerifications
 import io.zeebe.client.ZeebeClient
@@ -127,7 +127,20 @@ class ZeebeRunner : TestRunner {
                 }
                 .timeout(Duration.ofSeconds(1))
                 .open()
-            }
+    }
+
+    override fun publishMessage(messageName: String, correlationKey: String, variables: String) {
+        logger.debug("Publishing a message. [name: {}, correlation-key: {}, variables: {}]",
+                messageName, correlationKey, variables)
+
+        client.newPublishMessageCommand()
+                .messageName(messageName)
+                .correlationKey(correlationKey)
+                .variables(variables)
+                .timeToLive(Duration.ofSeconds(10))
+                .send()
+                .join()
+    }
 
     override fun getWorkflowInstanceContexts(): List<WorkflowInstanceContext> {
 

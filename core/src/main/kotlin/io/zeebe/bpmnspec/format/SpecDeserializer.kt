@@ -6,6 +6,7 @@ import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.zeebe.bpmnspec.api.actions.CompleteTaskAction
 import io.zeebe.bpmnspec.api.actions.CreateInstanceAction
+import io.zeebe.bpmnspec.api.actions.PublishMessageAction
 import io.zeebe.bpmnspec.api.runner.WorkflowInstanceState
 import io.zeebe.bpmnspec.api.verifications.WorkflowInstanceStateVerification
 import java.io.InputStream
@@ -47,6 +48,11 @@ class SpecDeserializer {
             "complete-task" -> CompleteTaskAction(
                     jobType = args["job_type"]
                             ?: throw RuntimeException("Missing required parameter 'job_type' for action 'complete-task'"),
+                    variables = args["variables"] ?: "{}"
+            )
+            "publish-message" -> PublishMessageAction(
+                    messageName = args["message_name"] ?: throw RuntimeException("Missing required parameter 'message_name' for action 'publish-message'"),
+                    correlationKey = args["correlation_key"] ?: throw RuntimeException("Missing required parameter 'correlation_key' for action 'publish-message'"),
                     variables = args["variables"] ?: "{}"
             )
             else -> throw RuntimeException("Unknown action '$name'")

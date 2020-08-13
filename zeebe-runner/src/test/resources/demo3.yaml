@@ -1,0 +1,25 @@
+resources:
+  - demo2.bpmn
+
+testCases:
+  - name: publish message
+
+    actions:
+      - action: create-instance
+        args:
+          bpmn_process_id: demo2
+          variables: '{"key":"key-1"}'
+      - action: publish-message
+        args:
+          message_name: message-1
+          correlation_key: key-1
+          variables: '{}'
+      - action: complete-task
+        args:
+          job_type: b
+          variables: '{}'
+
+    verifications:
+      - verification: workflow-instance-state
+        args:
+          state: completed
