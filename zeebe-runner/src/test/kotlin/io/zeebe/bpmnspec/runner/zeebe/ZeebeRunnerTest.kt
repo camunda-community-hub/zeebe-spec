@@ -29,6 +29,7 @@ class ZeebeRunnerTest {
                     .isEqualTo(WorkflowInstanceState.COMPLETED)
         }
 
+        runner.cleanUp()
     }
 
 }

@@ -29,12 +29,15 @@ class ZeebeRunner : TestRunner {
     val hazelcastHost = "zeebe"
     val zeeqsPort = 9000
 
+    val closingSteps = mutableListOf<AutoCloseable>()
+
     lateinit var client: ZeebeClient
     lateinit var zeeqsVerifications: ZeeqsVerifications
 
     override fun init() {
 
         val network = Network.newNetwork()
+        closingSteps.add(network)
 
         val zeebeContainer = ZeebeBrokerContainer("0.24.1")
                 .withClasspathResourceMapping("application.yaml", "/usr/local/zeebe/config/application.yaml", BindMode.READ_ONLY)
@@ -43,11 +46,11 @@ class ZeebeRunner : TestRunner {
                 .withNetwork(network)
                 .withNetworkAliases(hazelcastHost)
 
-
         logger.debug("Starting the Zeebe container")
         zeebeContainer.start()
 
         logger.debug("Started the Zeebe container")
+        closingSteps.add(zeebeContainer)
 
         val zeebeGatewayPort = zeebeContainer.getExternalAddress(ZeebePort.GATEWAY)
 
@@ -56,6 +59,8 @@ class ZeebeRunner : TestRunner {
                 .brokerContactPoint(zeebeGatewayPort)
                 .usePlaintext()
                 .build()
+
+        closingSteps.add(client)
 
         val topology = client.newTopologyRequest().send().join()
         logger.trace("Zeebe topology: {}", topology)
@@ -72,6 +77,7 @@ class ZeebeRunner : TestRunner {
         zeeqsContainer.start()
 
         logger.debug("Started the ZeeQS container")
+        closingSteps.add(zeeqsContainer)
 
         val zeeqsContainerHost = zeeqsContainer.host
         val zeeqsContainerPort = zeeqsContainer.getMappedPort(zeeqsPort)
@@ -80,7 +86,10 @@ class ZeebeRunner : TestRunner {
     }
 
     override fun cleanUp() {
-        TODO("Not yet implemented")
+        logger.debug("Closing resources")
+        closingSteps.toList().reversed().forEach(AutoCloseable::close)
+
+        logger.debug("Closed resources")
     }
 
     override fun deployWorkflow(name: String, bpmnXml: InputStream) {
@@ -103,7 +112,7 @@ class ZeebeRunner : TestRunner {
     }
 
     override fun completeTask(jobType: String, variables: String) {
-        client.newWorker()
+        val jobWorker = client.newWorker()
                 .jobType(jobType)
                 .handler { jobClient, job ->
                     jobClient.newCompleteCommand(job.key)
@@ -113,7 +122,7 @@ class ZeebeRunner : TestRunner {
                 }
                 .timeout(Duration.ofSeconds(1))
                 .open()
-    }
+            }
 
     override fun getWorkflowInstanceState(context: WorkflowInstanceContext): WorkflowInstanceState {
 
@@ -126,8 +135,6 @@ class ZeebeRunner : TestRunner {
             else -> WorkflowInstanceState.ACTIVATED
         }
     }
-
-    class KGenericContainer(imageName: String) : GenericContainer<KGenericContainer>(imageName)
 
     class ZeeqsContainer(version: String) : GenericContainer<ZeeqsContainer>("camunda/zeeqs:$version")
 

@@ -42,7 +42,7 @@ class ZeeqsVerifications(val zeeqsEndpoint: String = "http://localhost:9000/grap
         val statusCode = response.statusCode()
         val responseBody = response.body()
 
-        logger.trace("Received query response from ZeeQS: [status-code: {}, body: ]", statusCode, responseBody)
+        logger.trace("Received query response from ZeeQS: [status-code: {}, body: {}]", statusCode, responseBody)
 
         if (statusCode != 200) {
             throw RuntimeException("Failed to query ZeeQS. [status-code: $statusCode, body: $responseBody]")
