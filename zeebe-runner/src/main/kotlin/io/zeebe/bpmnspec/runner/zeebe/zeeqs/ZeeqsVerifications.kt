@@ -33,22 +33,12 @@ class ZeeqsVerifications(val zeeqsEndpoint: String = "http://localhost:9000/grap
         return response.data.workflowInstance.state
     }
 
-    fun getElementInstanceById(workflowInstanceKey: Long, elementId: String): String {
+    fun getElementInstances(workflowInstanceKey: Long): List<ElementInstanceDto> {
 
         val responseBody = sendRequest("{ workflowInstance(key: $workflowInstanceKey) { elementInstances { elementId, elementName, state } } }")
         val response = objectMapper.readValue<ElementInstancesResponse>(responseBody)
 
-        val elementInstance = response.data.workflowInstance.elementInstances.first { it.elementId == elementId }
-        return elementInstance.state
-    }
-
-    fun getElementInstanceByName(workflowInstanceKey: Long, elementName: String): String {
-
-        val responseBody = sendRequest("{ workflowInstance(key: $workflowInstanceKey) { elementInstances { elementId, elementName, state } } }")
-        val response = objectMapper.readValue<ElementInstancesResponse>(responseBody)
-
-        val elementInstance = response.data.workflowInstance.elementInstances.first { it.elementName == elementName }
-        return elementInstance.state
+        return response.data.workflowInstance.elementInstances
     }
 
     fun getWorkflowInstanceVariables(workflowInstanceKey: Long): List<VariableDto> {

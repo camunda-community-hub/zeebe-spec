@@ -19,22 +19,33 @@ class ElementInstanceStateVerification(
                 ?: contexts.values.first()
 
         val actualState =
-                elementId?.let { runner.getElementInstanceStateById(context = context, elementId = it) }
-                        ?: elementName?.let { runner.getElementInstanceStateByName(context = context, elementName = it) }
-                        ?: "unknown"
+                runner.getElementInstances(context)
+                        .filter { elementInstance ->
+                            elementId?.let { it == elementInstance.elementId } ?: true
+                        }
+                        .filter { elementInstance ->
+                            elementName?.let { it == elementInstance.elementName } ?: true
+                        }
+                        .firstOrNull()
+                        ?.state
 
-        return if (actualState == state) {
-            VerificationResult(isFulfilled = true)
-        } else {
-            val wfAlias = workflowInstance?.let { "of the workflow instance '$it'" } ?: ""
-            val element = elementId?.let { "with id '$it'" }
-                    ?: elementName?.let { "with name '$it'" }
-                    ?: ""
+        val wfAlias = workflowInstance?.let { "of the workflow instance '$it'" } ?: ""
+        val element = elementId?.let { "with id '$it'" }
+                ?: elementName?.let { "with name '$it'" }
+                ?: ""
 
-            VerificationResult(
-                    isFulfilled = false,
-                    failureMessage = "Expected the element $element $wfAlias to be in state '$state' but was '$actualState'."
-            )
-        }
+        return actualState?.let {
+            if (it == state) {
+                VerificationResult(isFulfilled = true)
+            } else {
+                VerificationResult(
+                        isFulfilled = false,
+                        failureMessage = "Expected the element $element $wfAlias to be in state '$state' but was '$actualState'."
+                )
+            }
+        } ?: VerificationResult(
+                isFulfilled = false,
+                failureMessage = "Expected the element $element $wfAlias to be in state '$state' but no element instance found."
+        )
     }
 }

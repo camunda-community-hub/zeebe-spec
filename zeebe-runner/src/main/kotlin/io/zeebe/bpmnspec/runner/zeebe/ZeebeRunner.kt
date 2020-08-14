@@ -1,10 +1,7 @@
 package io.zeebe.bpmnspec.runner.zeebe
 
 import io.zeebe.bpmnspec.api.WorkflowInstanceContext
-import io.zeebe.bpmnspec.api.runner.ElementInstanceState
-import io.zeebe.bpmnspec.api.runner.TestRunner
-import io.zeebe.bpmnspec.api.runner.WorkflowInstanceState
-import io.zeebe.bpmnspec.api.runner.WorkflowInstanceVariable
+import io.zeebe.bpmnspec.api.runner.*
 import io.zeebe.bpmnspec.runner.zeebe.zeeqs.ZeeqsVerifications
 import io.zeebe.client.ZeebeClient
 import io.zeebe.containers.ZeebeBrokerContainer
@@ -189,33 +186,20 @@ class ZeebeRunner : TestRunner {
         }
     }
 
-    override fun getElementInstanceStateById(context: WorkflowInstanceContext, elementId: String): ElementInstanceState {
+    override fun getElementInstances(context: WorkflowInstanceContext): List<ElementInstance> {
         val wfContext = context as ZeebeWorkflowInstanceContext
 
-        val state = zeeqsVerifications.getElementInstanceById(
-                workflowInstanceKey = wfContext.workflowInstanceKey,
-                elementId = elementId)
-
-        return when (state) {
-            "ACTIVATED" -> ElementInstanceState.ACTIVATED
-            "COMPLETED" -> ElementInstanceState.COMPLETED
-            "TERMINATED" -> ElementInstanceState.TERMINATED
-            else -> ElementInstanceState.UNKNOWN
-        }
-    }
-
-    override fun getElementInstanceStateByName(context: WorkflowInstanceContext, elementName: String): ElementInstanceState {
-        val wfContext = context as ZeebeWorkflowInstanceContext
-
-        val state = zeeqsVerifications.getElementInstanceByName(
-                workflowInstanceKey = wfContext.workflowInstanceKey,
-                elementName = elementName)
-
-        return when (state) {
-            "ACTIVATED" -> ElementInstanceState.ACTIVATED
-            "COMPLETED" -> ElementInstanceState.COMPLETED
-            "TERMINATED" -> ElementInstanceState.TERMINATED
-            else -> ElementInstanceState.UNKNOWN
+        return zeeqsVerifications.getElementInstances(workflowInstanceKey = wfContext.workflowInstanceKey).map {
+            ElementInstance(
+                    elementId = it.elementId,
+                    elementName = it.elementName,
+                    state = when (it.state) {
+                        "ACTIVATED" -> ElementInstanceState.ACTIVATED
+                        "COMPLETED" -> ElementInstanceState.COMPLETED
+                        "TERMINATED" -> ElementInstanceState.TERMINATED
+                        else -> ElementInstanceState.UNKNOWN
+                    }
+            )
         }
     }
 
