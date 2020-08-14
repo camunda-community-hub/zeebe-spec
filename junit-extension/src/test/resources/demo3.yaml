@@ -1,0 +1,51 @@
+resources:
+  - demo2.bpmn
+
+testCases:
+  - name: publish message
+
+    actions:
+      - action: create-instance
+        args:
+          bpmn_process_id: demo2
+          variables: '{"key":"key-1"}'
+          workflow_instance_alias: wf-1
+      - action: await-element-instance-state
+        args:
+          element_name: message-1
+          state: activated
+      - action: publish-message
+        args:
+          message_name: message-1
+          correlation_key: key-1
+          variables: '{"x":1}'
+      - action: throw-error
+        args:
+          job_type: b
+          error_code: error-1
+      - action: complete-task
+        args:
+          job_type: c
+          variables: '{}'
+
+    verifications:
+      - verification: workflow-instance-state
+        args:
+          state: completed
+      - verification: element-instance-state
+        args:
+          element_id: Activity_1g1az2f
+          state: completed
+      - verification: element-instance-state
+        args:
+          element_name: B
+          state: terminated
+      - verification: workflow-instance-variable
+        args:
+          name: x
+          value: '1'
+      - verification: no-workflow-instance-variable
+        args:
+          name: x
+          value: '1'
+          element_name: message-1

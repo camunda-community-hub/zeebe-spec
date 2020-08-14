@@ -26,23 +26,10 @@ class SpecRunner(
         val spec = specDeserializer.readSpec(input)
 
         logger.debug("Running {} tests", spec.testCases.size)
-        val testResults = spec.testCases.map { testcase ->
-
-            testRunner.init()
-
-            spec.resources.forEach { resourceName ->
-                val resourceStream = resourceDirectory.resolve(resourceName).toFile().inputStream()
-                testRunner.deployWorkflow(resourceName, resourceStream)
-            }
-
-            logger.debug("Run the test [name: '{}', description: '{}']", testcase.name, testcase.description)
-            val result = runTestCase(testcase)
-
-            logger.debug("Test finished [name: '{}', success: '{}', message: '{}']", testcase.name, result.success, result.message)
-
-            testRunner.cleanUp()
-
-            result
+        val testResults = spec.testCases.map {
+            runTestCase(
+                    resources = spec.resources,
+                    testcase = it)
         }
 
         logger.debug("All tests finished [{}/{} passed]",
@@ -53,6 +40,26 @@ class SpecRunner(
                 spec = spec,
                 testResults = testResults
         )
+    }
+
+    fun runTestCase(resources: List<String>, testcase: TestCase): TestResult {
+        logger.debug("Preparing the test [name: '{}']", testcase.name)
+        testRunner.init()
+
+        logger.debug("Deploying resources for the test. [name: '{}', resources: {}]", testcase.name, resources.joinToString())
+        resources.forEach { resourceName ->
+            val resourceStream = resourceDirectory.resolve(resourceName).toFile().inputStream()
+            testRunner.deployWorkflow(resourceName, resourceStream)
+        }
+
+        logger.debug("Run the test [name: '{}', description: '{}']", testcase.name, testcase.description)
+        val result = runTestCase(testcase)
+
+        logger.debug("Test finished [name: '{}', success: '{}', message: '{}']", testcase.name, result.success, result.message)
+
+        testRunner.cleanUp()
+
+        return result
     }
 
     private fun runTestCase(testcase: TestCase): TestResult {

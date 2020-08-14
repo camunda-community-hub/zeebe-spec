@@ -1,0 +1,49 @@
+resources:
+  - demo.bpmn
+
+testCases:
+  - name: complete workflow
+    description: should work
+
+    actions:
+      - action: create-instance
+        args:
+          bpmn_process_id: demo
+      - action: complete-task
+        args:
+          job_type: a
+      - action: complete-task
+        args:
+          job_type: b
+      - action: complete-task
+        args:
+          job_type: c
+
+    verifications:
+      - verification: workflow-instance-state
+        args:
+          state: completed
+
+  - name: has variable from task
+    description: should fail
+
+    actions:
+      - action: create-instance
+        args:
+          bpmn_process_id: demo
+      - action: complete-task
+        args:
+          job_type: a
+          variables: '{"x":2}'
+      - action: complete-task
+        args:
+          job_type: b
+      - action: complete-task
+        args:
+          job_type: c
+
+    verifications:
+      - verification: workflow-instance-variable
+        args:
+          name: x
+          value: '1'
