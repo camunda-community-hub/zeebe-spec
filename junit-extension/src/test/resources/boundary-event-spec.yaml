@@ -1,0 +1,35 @@
+resources:
+  - message-boundary-event.bpmn
+
+testCases:
+  - name: interrupt-task
+    description: trigger the message event and interrupt the task
+
+    actions:
+      - action: create-instance
+        args:
+          bpmn_process_id: message-boundary-event
+          variables: '{"key":"key-1"}'
+      - action: await-element-instance-state
+        args:
+          element_name: A
+          state: activated
+      - action: publish-message
+        args:
+          message_name: cancel
+          correlation_key: key-1
+          variables: '{"x":1}'
+
+    verifications:
+      - verification: element-instance-state
+        args:
+          element_name: A
+          state: terminated
+      - verification: element-instance-state
+        args:
+          element_name: C
+          state: activated
+      - verification: workflow-instance-variable
+        args:
+          name: x
+          value: '1'

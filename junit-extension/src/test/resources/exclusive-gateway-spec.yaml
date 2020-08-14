@@ -1,0 +1,43 @@
+resources:
+  - exclusive-gateway.bpmn
+
+testCases:
+  - name: condition-flow
+    description: the condition is fulfilled
+    actions:
+      - action: create-instance
+        args:
+          bpmn_process_id: exclusive-gateway
+      - action: complete-task
+        args:
+          job_type: a
+          variables: '{"x":8}'
+
+    verifications:
+      - verification: workflow-instance-state
+        args:
+          state: completed
+      - verification: element-instance-state
+        args:
+          element_name: B
+          state: completed
+
+  - name: default-flow
+    description: take the default flow
+    actions:
+      - action: create-instance
+        args:
+          bpmn_process_id: exclusive-gateway
+      - action: complete-task
+        args:
+          job_type: a
+          variables: '{"x":3}'
+
+    verifications:
+      - verification: workflow-instance-state
+        args:
+          state: completed
+      - verification: element-instance-state
+        args:
+          element_name: C
+          state: completed

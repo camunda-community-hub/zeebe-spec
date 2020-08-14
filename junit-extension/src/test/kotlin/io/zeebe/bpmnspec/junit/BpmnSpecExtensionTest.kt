@@ -9,17 +9,29 @@ import java.nio.file.Path
 
 class BpmnSpecExtensionTest {
 
+    val resource = BpmnSpecExtensionTest::class.java.getResource("/demo.yaml")
+    val classpathDir = Path.of(resource.toURI()).parent
+
+    val runner = SpecRunner(
+            testRunner = ZeebeRunner(),
+            resourceDirectory = classpathDir)
+
     @TestTemplate
     @ExtendWith(BpmnSpecContextProvider::class)
-    @BpmnSpec(specResource = "demo.yaml")
-    fun `run demo`(spec: BpmnSpecTestCase) {
+    @BpmnSpec(specResource = "exclusive-gateway-spec.yaml")
+    fun `exclusive gateway`(spec: BpmnSpecTestCase) {
 
-        val resource = BpmnSpecExtensionTest::class.java.getResource("/demo.yaml")
-        val classpathDir = Path.of(resource.toURI()).parent
+        val testResult = runner.runTestCase(resources = spec.resources, testcase = spec.testCase)
 
-        val runner = SpecRunner(
-                testRunner = ZeebeRunner(),
-                resourceDirectory = classpathDir)
+        assertThat(testResult.success)
+                .describedAs(testResult.message)
+                .isTrue()
+    }
+
+    @TestTemplate
+    @ExtendWith(BpmnSpecContextProvider::class)
+    @BpmnSpec(specResource = "boundary-event-spec.yaml")
+    fun `boundary event`(spec: BpmnSpecTestCase) {
 
         val testResult = runner.runTestCase(resources = spec.resources, testcase = spec.testCase)
 
