@@ -67,8 +67,9 @@ testCases:
           job_type: a
           variables: '{"x":1}'
 
-      - verification: incident-created
+      - verification: incident-state
         args:
+          state: created|resolved
           error_type: unhandled_error_event
           error_message: bla
           element_id: task-a
