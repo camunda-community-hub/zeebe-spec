@@ -49,6 +49,14 @@ class ZeeqsVerifications(val zeeqsEndpoint: String = "http://localhost:9000/grap
         return response.data.workflowInstance.variables
     }
 
+    fun getIncidents(workflowInstanceKey: Long): List<IncidentDto> {
+
+        val responseBody = sendRequest("{ workflowInstance(key: $workflowInstanceKey) { incidents { errorType, errorMessage, state, elementInstance { elementId, elementName } } } }")
+        val response = objectMapper.readValue<IncidentsResponse>(responseBody)
+
+        return response.data.workflowInstance.incidents
+    }
+
     private fun sendRequest(query: String): String {
         val requestBody = HttpRequest.BodyPublishers.ofString("""{ "query": "$query" }""")
 
@@ -94,4 +102,9 @@ class ZeeqsVerifications(val zeeqsEndpoint: String = "http://localhost:9000/grap
     data class VariableDto(val name: String, val value: String, val scope: VariableScopeDto)
     data class VariableScopeDto(val elementId: String, val elementName: String?)
 
+    data class IncidentsResponse(val data: IncidentsDataDto)
+    data class IncidentsDataDto(val workflowInstance: IncidentsDto)
+    data class IncidentsDto(val incidents: List<IncidentDto>)
+    data class IncidentDto(val errorType: String, val errorMessage: String?, val state: String, val elementInstance: IncidentElementInstanceDto)
+    data class IncidentElementInstanceDto(val elementId: String, val elementName: String?)
 }

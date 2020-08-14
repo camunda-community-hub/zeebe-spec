@@ -65,4 +65,20 @@ class ZeebeRunnerTest {
         assertThat(result.testResults).hasSize(1)
     }
 
+    @Test
+    fun `should run the spec with incident`() {
+
+        val classpathDir = ZeebeRunnerTest::class.java.getResource("/demo-incident.yaml")
+        val classpath = Path.of(classpathDir.toURI()).parent
+
+        val runner = SpecRunner(
+                testRunner = ZeebeRunner(),
+                resourceDirectory = classpath)
+
+        val spec = ZeebeRunnerTest::class.java.getResourceAsStream("/demo-incident.yaml")
+        val result = runner.run(spec)
+
+        assertThat(result.testResults).hasSize(1)
+    }
+
 }

@@ -217,6 +217,25 @@ class ZeebeRunner : TestRunner {
                 }
     }
 
+    override fun getIncidents(context: WorkflowInstanceContext): List<Incident> {
+        val wfContext = context as ZeebeWorkflowInstanceContext
+
+        return zeeqsVerifications.getIncidents(workflowInstanceKey = wfContext.workflowInstanceKey)
+                .map {
+                    Incident(
+                            errorType = it.errorType,
+                            errorMessage = it.errorMessage,
+                            state = when(it.state) {
+                                "CREATED" -> IncidentState.CREATED
+                                "RESOLVED" -> IncidentState.RESOLVED
+                                else -> IncidentState.UNKNOWN
+                            },
+                            elementId = it.elementInstance.elementId,
+                            elementName = it.elementInstance.elementName
+                    )
+                }
+    }
+
     class ZeeqsContainer(version: String) : GenericContainer<ZeeqsContainer>("camunda/zeeqs:$version")
 
 }

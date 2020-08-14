@@ -29,4 +29,6 @@ interface TestRunner {
 
     fun getWorkflowInstanceVariables(context: WorkflowInstanceContext): List<WorkflowInstanceVariable>
 
+    fun getIncidents(context: WorkflowInstanceContext): List<Incident>
+
 }

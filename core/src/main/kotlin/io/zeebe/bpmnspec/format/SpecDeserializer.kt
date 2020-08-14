@@ -6,11 +6,9 @@ import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.zeebe.bpmnspec.api.actions.*
 import io.zeebe.bpmnspec.api.runner.ElementInstanceState
+import io.zeebe.bpmnspec.api.runner.IncidentState
 import io.zeebe.bpmnspec.api.runner.WorkflowInstanceState
-import io.zeebe.bpmnspec.api.verifications.ElementInstanceStateVerification
-import io.zeebe.bpmnspec.api.verifications.NoWorkflowInstanceVariableVerification
-import io.zeebe.bpmnspec.api.verifications.WorkflowInstanceStateVerification
-import io.zeebe.bpmnspec.api.verifications.WorkflowInstanceVariableVerification
+import io.zeebe.bpmnspec.api.verifications.*
 import java.io.InputStream
 
 class SpecDeserializer {
@@ -111,6 +109,16 @@ class SpecDeserializer {
                             ?: throw RuntimeException("Missing required parameter 'name' for verification 'no-workflow-instance-variable'"),
                     scopeElementId = args["element_id"],
                     scopeElementName = args["element_name"],
+                    workflowInstance = args["workflow_instance"]
+            )
+            "incident-state" -> IncidentStateVerification(
+                    state = args["state"]?.let { IncidentState.valueOf(it.toUpperCase()) }
+                            ?: throw RuntimeException("Missing required parameter 'state' for verification 'incident-state'"),
+                    errorType = args["error_type"]
+                            ?: throw RuntimeException("Missing required parameter 'errorType' for verification 'incident-state'"),
+                    errorMessage = args["error_message"],
+                    elementId = args["element_id"],
+                    elementName = args["element_name"],
                     workflowInstance = args["workflow_instance"]
             )
             else -> throw RuntimeException("Unknown verification: '$name'")
