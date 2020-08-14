@@ -1,6 +1,6 @@
 package io.zeebe.bpmnspec.api.runner
 
-enum class WorkflowInstanceState {
+enum class ElementInstanceState {
     UNKNOWN,
     ACTIVATED,
     COMPLETED,

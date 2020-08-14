@@ -26,4 +26,6 @@ interface TestRunner {
 
     fun getWorkflowInstanceState(context: WorkflowInstanceContext): WorkflowInstanceState
 
+    fun getElementInstanceState(context: WorkflowInstanceContext, elementId: String?, elementName: String?): ElementInstanceState
+
 }

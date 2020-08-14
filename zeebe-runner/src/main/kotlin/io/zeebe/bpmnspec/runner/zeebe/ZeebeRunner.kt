@@ -1,6 +1,7 @@
 package io.zeebe.bpmnspec.runner.zeebe
 
 import io.zeebe.bpmnspec.api.WorkflowInstanceContext
+import io.zeebe.bpmnspec.api.runner.ElementInstanceState
 import io.zeebe.bpmnspec.api.runner.TestRunner
 import io.zeebe.bpmnspec.api.runner.WorkflowInstanceState
 import io.zeebe.bpmnspec.runner.zeebe.zeeqs.ZeeqsVerifications
@@ -176,14 +177,29 @@ class ZeebeRunner : TestRunner {
     }
 
     override fun getWorkflowInstanceState(context: WorkflowInstanceContext): WorkflowInstanceState {
-
         val wfContext = context as ZeebeWorkflowInstanceContext
 
         val state = zeeqsVerifications.getWorkflowInstanceState(wfContext.workflowInstanceKey)
         return when (state) {
             "COMPLETED" -> WorkflowInstanceState.COMPLETED
             "TERMINATED" -> WorkflowInstanceState.TERMINATED
-            else -> WorkflowInstanceState.ACTIVATED
+            "ACTIVATED" -> WorkflowInstanceState.ACTIVATED
+            else -> WorkflowInstanceState.UNKNOWN
+        }
+    }
+
+    override fun getElementInstanceState(context: WorkflowInstanceContext, elementId: String?, elementName: String?): ElementInstanceState {
+        val wfContext = context as ZeebeWorkflowInstanceContext
+
+        val state = elementId?.let { zeeqsVerifications.getElementInstanceById(workflowInstanceKey = wfContext.workflowInstanceKey, elementId = it) }
+                ?: elementName?.let { zeeqsVerifications.getElementInstanceByName(workflowInstanceKey = wfContext.workflowInstanceKey, elementName = it) }
+                ?: "unknown"
+
+        return when (state) {
+            "ACTIVATED" -> ElementInstanceState.ACTIVATED
+            "COMPLETED" -> ElementInstanceState.COMPLETED
+            "TERMINATED" -> ElementInstanceState.TERMINATED
+            else -> ElementInstanceState.UNKNOWN
         }
     }
 

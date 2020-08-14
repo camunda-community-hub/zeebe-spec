@@ -5,7 +5,9 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLFactory
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.zeebe.bpmnspec.api.actions.*
+import io.zeebe.bpmnspec.api.runner.ElementInstanceState
 import io.zeebe.bpmnspec.api.runner.WorkflowInstanceState
+import io.zeebe.bpmnspec.api.verifications.ElementInstanceStateVerification
 import io.zeebe.bpmnspec.api.verifications.WorkflowInstanceStateVerification
 import java.io.InputStream
 
@@ -49,8 +51,10 @@ class SpecDeserializer {
                     variables = args["variables"] ?: "{}"
             )
             "publish-message" -> PublishMessageAction(
-                    messageName = args["message_name"] ?: throw RuntimeException("Missing required parameter 'message_name' for action 'publish-message'"),
-                    correlationKey = args["correlation_key"] ?: throw RuntimeException("Missing required parameter 'correlation_key' for action 'publish-message'"),
+                    messageName = args["message_name"]
+                            ?: throw RuntimeException("Missing required parameter 'message_name' for action 'publish-message'"),
+                    correlationKey = args["correlation_key"]
+                            ?: throw RuntimeException("Missing required parameter 'correlation_key' for action 'publish-message'"),
                     variables = args["variables"] ?: "{}"
             )
             "throw-error" -> ThrowErrorAction(
@@ -75,6 +79,13 @@ class SpecDeserializer {
             "workflow-instance-state" -> WorkflowInstanceStateVerification(
                     state = args["state"]?.let { WorkflowInstanceState.valueOf(it.toUpperCase()) }
                             ?: throw RuntimeException("Missing required parameter 'state' for verification 'workflow-instance-state'"),
+                    workflowInstance = args["workflow_instance"]
+            )
+            "element-instance-state" -> ElementInstanceStateVerification(
+                    state = args["state"]?.let { ElementInstanceState.valueOf(it.toUpperCase()) }
+                            ?: throw RuntimeException("Missing required parameter 'state' for verification 'element-instance-state'"),
+                    elementId = args["element_id"],
+                    elementName = args["element_name"],
                     workflowInstance = args["workflow_instance"]
             )
             else -> throw RuntimeException("Unknown verification: '$name'")

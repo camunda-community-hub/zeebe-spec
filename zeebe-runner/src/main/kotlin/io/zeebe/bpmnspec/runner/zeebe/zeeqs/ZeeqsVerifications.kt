@@ -33,6 +33,24 @@ class ZeeqsVerifications(val zeeqsEndpoint: String = "http://localhost:9000/grap
         return response.data.workflowInstance.state
     }
 
+    fun getElementInstanceById(workflowInstanceKey: Long, elementId: String): String {
+
+        val responseBody = sendRequest("{ workflowInstance(key: $workflowInstanceKey) { elementInstances { elementId, elementName, state } } }")
+        val response = objectMapper.readValue<ElementInstancesResponse>(responseBody)
+
+        val elementInstance = response.data.workflowInstance.elementInstances.first { it.elementId == elementId }
+        return elementInstance.state
+    }
+
+    fun getElementInstanceByName(workflowInstanceKey: Long, elementName: String): String {
+
+        val responseBody = sendRequest("{ workflowInstance(key: $workflowInstanceKey) { elementInstances { elementId, elementName, state } } }")
+        val response = objectMapper.readValue<ElementInstancesResponse>(responseBody)
+
+        val elementInstance = response.data.workflowInstance.elementInstances.first { it.elementName == elementName }
+        return elementInstance.state
+    }
+
     private fun sendRequest(query: String): String {
         val requestBody = HttpRequest.BodyPublishers.ofString("""{ "query": "$query" }""")
 
@@ -60,15 +78,16 @@ class ZeeqsVerifications(val zeeqsEndpoint: String = "http://localhost:9000/grap
     }
 
     data class WorkflowInstanceResponse(val data: WorkflowInstanceDataDto)
-
     data class WorkflowInstanceDataDto(val workflowInstance: WorkflowInstanceDto)
-
     data class WorkflowInstanceDto(val key: String, val state: String)
 
+    data class WorkflowInstancesResponse(val data: WorkflowInstancesDataDto)
     data class WorkflowInstancesDataDto(val workflowInstances: WorkflowInstancesDto)
-
     data class WorkflowInstancesDto(val nodes: List<WorkflowInstanceDto>)
 
-    data class WorkflowInstancesResponse(val data: WorkflowInstancesDataDto)
+    data class ElementInstancesResponse(val data: ElementInstancesDataDto)
+    data class ElementInstancesDataDto(val workflowInstance: ElementInstancesDto)
+    data class ElementInstancesDto(val elementInstances: List<ElementInstanceDto>)
+    data class ElementInstanceDto(val state: String, val elementId: String, val elementName: String?)
 
 }

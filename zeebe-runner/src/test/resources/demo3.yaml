@@ -28,3 +28,11 @@ testCases:
       - verification: workflow-instance-state
         args:
           state: completed
+      - verification: element-instance-state
+        args:
+          element_id: Activity_1g1az2f
+          state: completed
+      - verification: element-instance-state
+        args:
+          element_name: B
+          state: terminated

@@ -28,6 +28,12 @@ testCases:
       - action: cancel-instance
         args:
           workflow_instance: wf-1
+      - action: await-element-instance-state
+        args:
+          state: activated|completed|terminated
+          element_name: task-a
+          element_id: service-task-1
+          workflow_instance: wf-1
       - action: time-travel
         args:
           fast_forward: PT10M
