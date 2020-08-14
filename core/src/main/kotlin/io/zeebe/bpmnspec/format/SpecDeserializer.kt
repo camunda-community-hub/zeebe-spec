@@ -67,6 +67,13 @@ class SpecDeserializer {
             "cancel-instance" -> CancelInstanceAction(
                     workflowInstance = args["workflow_instance"]
             )
+            "await-element-instance-state" -> AwaitElementInstanceStateAction(
+                    state = args["state"]?.let { ElementInstanceState.valueOf(it.toUpperCase()) }
+                            ?: throw RuntimeException("Missing required parameter 'state' for action 'await-element-instance-state'"),
+                    elementId = args["element_id"],
+                    elementName = args["element_name"],
+                    workflowInstance = args["workflow_instance"]
+            )
             else -> throw RuntimeException("Unknown action '$name'")
         }
     }
