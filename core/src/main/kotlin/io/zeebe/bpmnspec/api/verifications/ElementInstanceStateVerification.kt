@@ -18,11 +18,10 @@ class ElementInstanceStateVerification(
         val context = workflowInstance?.let { contexts[workflowInstance] }
                 ?: contexts.values.first()
 
-        val actualState = runner.getElementInstanceState(
-                context = context,
-                elementId = elementId,
-                elementName = elementName
-        )
+        val actualState =
+                elementId?.let { runner.getElementInstanceStateById(context = context, elementId = it) }
+                        ?: elementName?.let { runner.getElementInstanceStateByName(context = context, elementName = it) }
+                        ?: "unknown"
 
         return if (actualState == state) {
             VerificationResult(isFulfilled = true)

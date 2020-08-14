@@ -18,7 +18,7 @@ testCases:
         args:
           message_name: message-1
           correlation_key: key-1
-          variables: '{}'
+          variables: '{"x":1}'
       - action: throw-error
         args:
           job_type: b
@@ -40,3 +40,7 @@ testCases:
         args:
           element_name: B
           state: terminated
+      - verification: workflow-instance-variable
+        args:
+          name: x
+          value: '1'

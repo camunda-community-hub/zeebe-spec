@@ -4,6 +4,7 @@ import io.zeebe.bpmnspec.api.WorkflowInstanceContext
 import io.zeebe.bpmnspec.api.runner.ElementInstanceState
 import io.zeebe.bpmnspec.api.runner.TestRunner
 import io.zeebe.bpmnspec.api.runner.WorkflowInstanceState
+import io.zeebe.bpmnspec.api.runner.WorkflowInstanceVariable
 import io.zeebe.bpmnspec.runner.zeebe.zeeqs.ZeeqsVerifications
 import io.zeebe.client.ZeebeClient
 import io.zeebe.containers.ZeebeBrokerContainer
@@ -188,12 +189,12 @@ class ZeebeRunner : TestRunner {
         }
     }
 
-    override fun getElementInstanceState(context: WorkflowInstanceContext, elementId: String?, elementName: String?): ElementInstanceState {
+    override fun getElementInstanceStateById(context: WorkflowInstanceContext, elementId: String): ElementInstanceState {
         val wfContext = context as ZeebeWorkflowInstanceContext
 
-        val state = elementId?.let { zeeqsVerifications.getElementInstanceById(workflowInstanceKey = wfContext.workflowInstanceKey, elementId = it) }
-                ?: elementName?.let { zeeqsVerifications.getElementInstanceByName(workflowInstanceKey = wfContext.workflowInstanceKey, elementName = it) }
-                ?: "unknown"
+        val state = zeeqsVerifications.getElementInstanceById(
+                workflowInstanceKey = wfContext.workflowInstanceKey,
+                elementId = elementId)
 
         return when (state) {
             "ACTIVATED" -> ElementInstanceState.ACTIVATED
@@ -201,6 +202,35 @@ class ZeebeRunner : TestRunner {
             "TERMINATED" -> ElementInstanceState.TERMINATED
             else -> ElementInstanceState.UNKNOWN
         }
+    }
+
+    override fun getElementInstanceStateByName(context: WorkflowInstanceContext, elementName: String): ElementInstanceState {
+        val wfContext = context as ZeebeWorkflowInstanceContext
+
+        val state = zeeqsVerifications.getElementInstanceByName(
+                workflowInstanceKey = wfContext.workflowInstanceKey,
+                elementName = elementName)
+
+        return when (state) {
+            "ACTIVATED" -> ElementInstanceState.ACTIVATED
+            "COMPLETED" -> ElementInstanceState.COMPLETED
+            "TERMINATED" -> ElementInstanceState.TERMINATED
+            else -> ElementInstanceState.UNKNOWN
+        }
+    }
+
+    override fun getWorkflowInstanceVariables(context: WorkflowInstanceContext): List<WorkflowInstanceVariable> {
+        val wfContext = context as ZeebeWorkflowInstanceContext
+
+        return zeeqsVerifications.getWorkflowInstanceVariables(workflowInstanceKey = wfContext.workflowInstanceKey)
+                .map {
+                    WorkflowInstanceVariable(
+                            variableName = it.name,
+                            variableValue = it.value,
+                            scopeElementId = it.scope.elementId,
+                            scopeElementName = it.scope.elementName
+                    )
+                }
     }
 
     class ZeeqsContainer(version: String) : GenericContainer<ZeeqsContainer>("camunda/zeeqs:$version")

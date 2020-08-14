@@ -9,6 +9,7 @@ import io.zeebe.bpmnspec.api.runner.ElementInstanceState
 import io.zeebe.bpmnspec.api.runner.WorkflowInstanceState
 import io.zeebe.bpmnspec.api.verifications.ElementInstanceStateVerification
 import io.zeebe.bpmnspec.api.verifications.WorkflowInstanceStateVerification
+import io.zeebe.bpmnspec.api.verifications.WorkflowInstanceVariableVerification
 import java.io.InputStream
 
 class SpecDeserializer {
@@ -93,6 +94,15 @@ class SpecDeserializer {
                             ?: throw RuntimeException("Missing required parameter 'state' for verification 'element-instance-state'"),
                     elementId = args["element_id"],
                     elementName = args["element_name"],
+                    workflowInstance = args["workflow_instance"]
+            )
+            "workflow-instance-variable" -> WorkflowInstanceVariableVerification(
+                    variableName = args["name"]
+                            ?: throw RuntimeException("Missing required parameter 'name' for verification 'workflow-instance-variable'"),
+                    variableValue = args["value"]
+                            ?: throw RuntimeException("Missing required parameter 'value' for verification 'workflow-instance-variable'"),
+                    scopeElementId = args["element_id"],
+                    scopeElementName = args["element_name"],
                     workflowInstance = args["workflow_instance"]
             )
             else -> throw RuntimeException("Unknown verification: '$name'")

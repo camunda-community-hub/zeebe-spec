@@ -1,7 +1,6 @@
 package io.zeebe.bpmnspec.api.actions
 
 import io.zeebe.bpmnspec.api.Action
-import io.zeebe.bpmnspec.api.VerificationResult
 import io.zeebe.bpmnspec.api.WorkflowInstanceContext
 import io.zeebe.bpmnspec.api.runner.ElementInstanceState
 import io.zeebe.bpmnspec.api.runner.TestRunner
@@ -12,7 +11,7 @@ class AwaitElementInstanceStateAction(
         val state: ElementInstanceState,
         val elementId: String?,
         val elementName: String?,
-        val workflowInstance: String?): Action {
+        val workflowInstance: String?) : Action {
 
     // TODO (saig0): take from runner configuration
     val timeout = Duration.ofSeconds(10)
@@ -25,11 +24,10 @@ class AwaitElementInstanceStateAction(
         val start = Instant.now()
 
         do {
-            val actualState = runner.getElementInstanceState(
-                    context = context,
-                    elementId = elementId,
-                    elementName = elementName
-            )
+            val actualState =
+                    elementId?.let { runner.getElementInstanceStateById(context = context, elementId = it) }
+                            ?: elementName?.let { runner.getElementInstanceStateByName(context = context, elementName = it) }
+                            ?: "unknown"
 
             val shouldRetry = actualState != state &&
                     Duration.between(start, Instant.now()).minus(timeout).isNegative

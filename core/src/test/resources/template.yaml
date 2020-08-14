@@ -55,11 +55,8 @@ testCases:
         args:
           name: x
           value: '123'
-      - verification: workflow-instance-variable-created
-        args:
-          name: y
-          value: '"foo"'
           element_name: sub-process
+
       - verification: no-workflow-instance-variable-created
           args:
             name: y

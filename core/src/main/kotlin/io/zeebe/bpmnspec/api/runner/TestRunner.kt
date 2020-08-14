@@ -2,7 +2,6 @@ package io.zeebe.bpmnspec.api.runner
 
 import io.zeebe.bpmnspec.api.WorkflowInstanceContext
 import java.io.InputStream
-import java.time.Duration
 
 interface TestRunner {
 
@@ -26,6 +25,10 @@ interface TestRunner {
 
     fun getWorkflowInstanceState(context: WorkflowInstanceContext): WorkflowInstanceState
 
-    fun getElementInstanceState(context: WorkflowInstanceContext, elementId: String?, elementName: String?): ElementInstanceState
+    fun getElementInstanceStateById(context: WorkflowInstanceContext, elementId: String): ElementInstanceState
+
+    fun getElementInstanceStateByName(context: WorkflowInstanceContext, elementName: String): ElementInstanceState
+
+    fun getWorkflowInstanceVariables(context: WorkflowInstanceContext): List<WorkflowInstanceVariable>
 
 }
