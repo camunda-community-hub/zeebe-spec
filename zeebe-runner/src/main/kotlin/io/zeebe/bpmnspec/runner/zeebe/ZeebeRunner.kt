@@ -11,18 +11,13 @@ import org.testcontainers.containers.BindMode
 import org.testcontainers.containers.GenericContainer
 import org.testcontainers.containers.Network
 import org.testcontainers.containers.wait.strategy.Wait
-import org.testcontainers.utility.MountableFile
 import java.io.InputStream
-import java.nio.file.Path
-import java.nio.file.Paths
 import java.time.Duration
 
 class ZeebeRunner : TestRunner {
 
     val logger = LoggerFactory.getLogger(ZeebeRunner::class.java)
 
-    val exporterJarPath: Path = Paths.get("../target/exporter/zeebe-hazelcast-exporter.jar")
-    val containerPath = "/usr/local/zeebe/exporter/zeebe-hazelcast-exporter.jar"
     val hazelcastPort = 5701
     val hazelcastHost = "zeebe"
     val zeeqsPort = 9000
@@ -37,14 +32,13 @@ class ZeebeRunner : TestRunner {
         val network = Network.newNetwork()
         closingSteps.add(network)
 
-        val zeebeContainer = ZeebeBrokerContainer("0.24.1")
+        val zeebeContainer = ZeebeBrokerContainer("camunda/zeebe-with-hazelcast-exporter", "0.24.2-0.10.0-alpha1")
                 .withClasspathResourceMapping("application.yaml", "/usr/local/zeebe/config/application.yaml", BindMode.READ_ONLY)
-                .withCopyFileToContainer(MountableFile.forHostPath(exporterJarPath), containerPath)
                 .withExposedPorts(hazelcastPort)
                 .withNetwork(network)
                 .withNetworkAliases(hazelcastHost)
 
-        logger.debug("Starting the Zeebe container")
+        logger.debug("Starting the Zeebe container [image: {}]", zeebeContainer.dockerImageName)
         zeebeContainer.start()
 
         logger.debug("Started the Zeebe container")
@@ -60,8 +54,8 @@ class ZeebeRunner : TestRunner {
 
         closingSteps.add(client)
 
-        val topology = client.newTopologyRequest().send().join()
-        logger.trace("Zeebe topology: {}", topology)
+        // verify that the client is connected
+        client.newTopologyRequest().send().join()
 
         val zeeqsContainer = ZeeqsContainer("1.0.0-alpha2")
                 .withEnv("zeebe.hazelcast.connection", "$hazelcastHost:$hazelcastPort")
@@ -71,7 +65,7 @@ class ZeebeRunner : TestRunner {
                 .withNetwork(network)
                 .withNetworkAliases("zeeqs")
 
-        logger.debug("Starting the ZeeQS container")
+        logger.debug("Starting the ZeeQS container [image: {}]", zeeqsContainer.dockerImageName)
         zeeqsContainer.start()
 
         logger.debug("Started the ZeeQS container")
@@ -225,7 +219,7 @@ class ZeebeRunner : TestRunner {
                     Incident(
                             errorType = it.errorType,
                             errorMessage = it.errorMessage,
-                            state = when(it.state) {
+                            state = when (it.state) {
                                 "CREATED" -> IncidentState.CREATED
                                 "RESOLVED" -> IncidentState.RESOLVED
                                 else -> IncidentState.UNKNOWN
