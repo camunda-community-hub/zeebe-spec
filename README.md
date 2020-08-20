@@ -7,7 +7,8 @@ A tool to write tests for BPMN workflows.
 **Features** :sparkles:
 
 * business-friendly: the test spec is written in a text format, no coding is required
-* vendor independent: the tests can run against any BPMN engine (if an integration is provided)   
+* vendor independent: the tests can run against any BPMN engine, available integrations
+  * [Zeebe](https://github.com/zeebe-io/zeebe)
 
 ## Usage
 
