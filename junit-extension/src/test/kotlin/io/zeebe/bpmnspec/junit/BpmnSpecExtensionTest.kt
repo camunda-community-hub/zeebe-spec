@@ -18,7 +18,7 @@ class BpmnSpecExtensionTest {
     @BpmnSpec(specResource = "exclusive-gateway-spec.yaml")
     fun `exclusive gateway`(spec: BpmnSpecTestCase) {
 
-        val testResult = specRunner.runTestCase(resources = spec.resources, testcase = spec.testCase)
+        val testResult = specRunner.runSingleTestCase(resources = spec.resources, testcase = spec.testCase)
 
         assertThat(testResult.success)
                 .describedAs(testResult.message)
@@ -30,7 +30,7 @@ class BpmnSpecExtensionTest {
     @BpmnSpec(specResource = "boundary-event-spec.yaml")
     fun `boundary event`(spec: BpmnSpecTestCase) {
 
-        val testResult = specRunner.runTestCase(resources = spec.resources, testcase = spec.testCase)
+        val testResult = specRunner.runSingleTestCase(resources = spec.resources, testcase = spec.testCase)
 
         assertThat(testResult.success)
                 .describedAs(testResult.message)

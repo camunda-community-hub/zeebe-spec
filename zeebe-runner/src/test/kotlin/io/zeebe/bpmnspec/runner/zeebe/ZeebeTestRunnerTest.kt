@@ -42,7 +42,7 @@ class ZeebeTestRunnerTest {
     fun `Runner with ZeebeTestRunner should run the spec`() {
 
         val spec = ZeebeTestRunnerTest::class.java.getResourceAsStream("/demo.yaml")
-        val result = specRunner.run(spec)
+        val result = specRunner.runSpec(spec)
 
         assertThat(result.testResults).hasSize(1)
     }
@@ -51,7 +51,7 @@ class ZeebeTestRunnerTest {
     fun `should run the spec with message`() {
 
         val spec = ZeebeTestRunnerTest::class.java.getResourceAsStream("/demo3.yaml")
-        val result = specRunner.run(spec)
+        val result = specRunner.runSpec(spec)
 
         assertThat(result.testResults).hasSize(1)
     }
@@ -60,7 +60,7 @@ class ZeebeTestRunnerTest {
     fun `should run the spec with incident`() {
 
         val spec = ZeebeTestRunnerTest::class.java.getResourceAsStream("/demo-incident.yaml")
-        val result = specRunner.run(spec)
+        val result = specRunner.runSpec(spec)
 
         assertThat(result.testResults).hasSize(1)
     }
@@ -69,7 +69,7 @@ class ZeebeTestRunnerTest {
     fun `should fail verification`() {
 
         val spec = ZeebeTestRunnerTest::class.java.getResourceAsStream("/failed-test-case.yaml")
-        val result = specRunner.run(spec)
+        val result = specRunner.runSpec(spec)
 
         assertThat(result.testResults).hasSize(1)
 
@@ -86,7 +86,7 @@ class ZeebeTestRunnerTest {
     fun `should collect output`() {
 
         val spec = ZeebeTestRunnerTest::class.java.getResourceAsStream("/demo.yaml")
-        val result = specRunner.run(spec)
+        val result = specRunner.runSpec(spec)
 
         assertThat(result.testResults).hasSize(1)
 

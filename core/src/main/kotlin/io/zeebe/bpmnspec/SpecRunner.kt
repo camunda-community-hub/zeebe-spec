@@ -10,8 +10,8 @@ import java.time.Duration
 import java.time.Instant
 
 class SpecRunner(
-        val testRunner: TestRunner,
-        val resourceResolver: ResourceResolver = DirectoryResourceResolver(rootDirectory = Path.of(".")),
+        private val testRunner: TestRunner,
+        private val resourceResolver: ResourceResolver = DirectoryResourceResolver(rootDirectory = Path.of(".")),
         val verificationTimeout: Duration = Duration.ofSeconds(10),
         val verificationRetryInterval: Duration = Duration.ofMillis(10)
 ) {
@@ -20,7 +20,7 @@ class SpecRunner(
 
     private val specDeserializer = SpecDeserializer()
 
-    fun run(input: InputStream): TestSpecResult {
+    fun runSpec(input: InputStream): TestSpecResult {
 
         logger.trace("Reading the spec")
         val spec = specDeserializer.readSpec(input)
@@ -46,7 +46,20 @@ class SpecRunner(
         )
     }
 
-    fun runTestCase(resources: List<String>, testcase: TestCase): TestResult {
+    fun runSingleTestCase(resources: List<String>, testcase: TestCase): TestResult {
+        logger.debug("Running a single test")
+        testRunner.beforeAll()
+
+        val testResult = runTestCase(
+                resources = resources,
+                testcase = testcase)
+
+        testRunner.afterAll()
+
+        return testResult
+    }
+
+    private fun runTestCase(resources: List<String>, testcase: TestCase): TestResult {
         logger.debug("Preparing the test [name: '{}']", testcase.name)
         testRunner.beforeEach()
 
