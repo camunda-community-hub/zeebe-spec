@@ -1,7 +1,7 @@
 package io.zeebe.bpmnspec.actions
 
 import io.zeebe.bpmnspec.api.Action
-import io.zeebe.bpmnspec.api.WorkflowInstanceContext
+import io.zeebe.bpmnspec.api.TestContext
 import io.zeebe.bpmnspec.api.runner.TestRunner
 
 class CreateInstanceAction(
@@ -10,10 +10,10 @@ class CreateInstanceAction(
         val workflowInstanceAlias: String?
 ) : Action {
 
-    override fun execute(runner: TestRunner, contexts: MutableMap<String, WorkflowInstanceContext>) {
-        val context = runner.createWorkflowInstance(bpmnProcessId, variables)
+    override fun execute(runner: TestRunner,testContext: TestContext) {
+        val wfContext = runner.createWorkflowInstance(bpmnProcessId, variables)
 
         val alias = workflowInstanceAlias ?: bpmnProcessId
-        contexts.put(alias, context)
+        testContext.storeContext(alias, wfContext)
     }
 }

@@ -1,6 +1,7 @@
 package io.zeebe.bpmnspec.actions
 
 import io.zeebe.bpmnspec.api.Action
+import io.zeebe.bpmnspec.api.TestContext
 import io.zeebe.bpmnspec.api.WorkflowInstanceContext
 import io.zeebe.bpmnspec.api.runner.TestRunner
 
@@ -10,7 +11,7 @@ class ThrowErrorAction(
         val errorMessage: String
 ) : Action {
 
-    override fun execute(runner: TestRunner, contexts: MutableMap<String, WorkflowInstanceContext>) {
+    override fun execute(runner: TestRunner, testContext: TestContext) {
         runner.throwError(
                 jobType = jobType,
                 errorCode = errorCode,

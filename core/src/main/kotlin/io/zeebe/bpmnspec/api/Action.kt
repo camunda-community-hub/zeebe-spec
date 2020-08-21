@@ -4,6 +4,6 @@ import io.zeebe.bpmnspec.api.runner.TestRunner
 
 interface Action {
 
-    fun execute(runner: TestRunner, contexts: MutableMap<String, WorkflowInstanceContext>)
+    fun execute(runner: TestRunner, testContext: TestContext)
 
 }

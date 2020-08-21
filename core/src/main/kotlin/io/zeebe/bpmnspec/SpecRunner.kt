@@ -12,8 +12,8 @@ import java.time.Instant
 class SpecRunner(
         private val testRunner: TestRunner,
         private val resourceResolver: ResourceResolver = DirectoryResourceResolver(rootDirectory = Path.of(".")),
-        val verificationTimeout: Duration = Duration.ofSeconds(10),
-        val verificationRetryInterval: Duration = Duration.ofMillis(10)
+        private val verificationTimeout: Duration = Duration.ofSeconds(10),
+        private val verificationRetryInterval: Duration = Duration.ofMillis(10)
 ) {
 
     private val logger = LoggerFactory.getLogger(SpecRunner::class.java)
@@ -83,10 +83,18 @@ class SpecRunner(
 
         val contexts = mutableMapOf<String, WorkflowInstanceContext>()
 
-        testcase.actions.forEach { it.execute(testRunner, contexts) }
+        // TODO (saig0): handle case when the context is not found
+        val testContext = TestContext(
+                storeContext = { alias, context -> contexts.put(alias, context) },
+                getContext = { alias -> alias.let { contexts[it] } ?: contexts.values.first()  },
+                verificationTimeout = verificationTimeout,
+                verificationRetryInterval = verificationRetryInterval
+        )
+
+        testcase.actions.forEach { it.execute(testRunner, testContext) }
 
         if (contexts.isEmpty()) {
-            contexts.putAll(testRunner.getWorkflowInstanceContexts().map { Pair("unnamed", it) }.toMap())
+            testRunner.getWorkflowInstanceContexts().mapIndexed{ index, wfContext -> contexts.put("wf-$index", wfContext) }
         }
 
         val start = Instant.now()

@@ -1,6 +1,7 @@
 package io.zeebe.bpmnspec.actions
 
 import io.zeebe.bpmnspec.api.Action
+import io.zeebe.bpmnspec.api.TestContext
 import io.zeebe.bpmnspec.api.WorkflowInstanceContext
 import io.zeebe.bpmnspec.api.runner.ElementInstanceState
 import io.zeebe.bpmnspec.api.runner.TestRunner
@@ -13,13 +14,8 @@ class AwaitElementInstanceStateAction(
         val elementName: String?,
         val workflowInstance: String?) : Action {
 
-    // TODO (saig0): take from runner configuration
-    val timeout = Duration.ofSeconds(10)
-    val retryInterval = Duration.ofMillis(10)
-
-    override fun execute(runner: TestRunner, contexts: MutableMap<String, WorkflowInstanceContext>) {
-        val context = workflowInstance?.let { contexts[workflowInstance] }
-                ?: contexts.values.first()
+    override fun execute(runner: TestRunner, testContext: TestContext) {
+        val context = testContext.getContext(workflowInstance)
 
         val start = Instant.now()
 
@@ -36,10 +32,10 @@ class AwaitElementInstanceStateAction(
                             ?.state
 
             val shouldRetry = actualState?.let { it != state } ?: true &&
-                    Duration.between(start, Instant.now()).minus(timeout).isNegative
+                    Duration.between(start, Instant.now()).minus(testContext.verificationTimeout).isNegative
 
             if (shouldRetry) {
-                Thread.sleep(retryInterval.toMillis())
+                Thread.sleep(testContext.verificationRetryInterval.toMillis())
             }
         } while (shouldRetry)
 
