@@ -2,92 +2,46 @@ package io.zeebe.bpmnspec.runner.zeebe
 
 import io.zeebe.bpmnspec.api.WorkflowInstanceContext
 import io.zeebe.bpmnspec.api.runner.*
-import io.zeebe.bpmnspec.runner.zeebe.zeeqs.ZeeqsVerifications
-import io.zeebe.client.ZeebeClient
-import io.zeebe.containers.ZeebeBrokerContainer
-import io.zeebe.containers.ZeebePort
 import org.slf4j.LoggerFactory
-import org.testcontainers.containers.BindMode
-import org.testcontainers.containers.GenericContainer
-import org.testcontainers.containers.Network
-import org.testcontainers.containers.wait.strategy.Wait
 import java.io.InputStream
 import java.time.Duration
 
-class ZeebeRunner : TestRunner {
+class ZeebeTestRunner(
+        private val reuseEnvironment: Boolean = false
+) : TestRunner {
 
-    val logger = LoggerFactory.getLogger(ZeebeRunner::class.java)
+    private val logger = LoggerFactory.getLogger(ZeebeTestRunner::class.java)
 
-    val hazelcastPort = 5701
-    val hazelcastHost = "zeebe"
-    val zeeqsPort = 9000
+    private val environment = ZeebeEnvironment()
 
-    val closingSteps = mutableListOf<AutoCloseable>()
-
-    lateinit var client: ZeebeClient
-    lateinit var zeeqsVerifications: ZeeqsVerifications
-
-    override fun init() {
-
-        val network = Network.newNetwork()
-        closingSteps.add(network)
-
-        val zeebeContainer = ZeebeBrokerContainer("camunda/zeebe-with-hazelcast-exporter", "0.24.2-0.10.0-alpha1")
-                .withClasspathResourceMapping("application.yaml", "/usr/local/zeebe/config/application.yaml", BindMode.READ_ONLY)
-                .withExposedPorts(hazelcastPort)
-                .withNetwork(network)
-                .withNetworkAliases(hazelcastHost)
-
-        logger.debug("Starting the Zeebe container [image: {}]", zeebeContainer.dockerImageName)
-        zeebeContainer.start()
-
-        logger.debug("Started the Zeebe container")
-        closingSteps.add(zeebeContainer)
-
-        val zeebeGatewayPort = zeebeContainer.getExternalAddress(ZeebePort.GATEWAY)
-
-        client = ZeebeClient
-                .newClientBuilder()
-                .brokerContactPoint(zeebeGatewayPort)
-                .usePlaintext()
-                .build()
-
-        closingSteps.add(client)
-
-        // verify that the client is connected
-        client.newTopologyRequest().send().join()
-
-        val zeeqsContainer = ZeeqsContainer("1.0.0-alpha2")
-                .withEnv("zeebe.hazelcast.connection", "$hazelcastHost:$hazelcastPort")
-                .withExposedPorts(zeeqsPort)
-                .dependsOn(zeebeContainer)
-                .waitingFor(Wait.forHttp("/actuator/health"))
-                .withNetwork(network)
-                .withNetworkAliases("zeeqs")
-
-        logger.debug("Starting the ZeeQS container [image: {}]", zeeqsContainer.dockerImageName)
-        zeeqsContainer.start()
-
-        logger.debug("Started the ZeeQS container")
-        closingSteps.add(zeeqsContainer)
-
-        val zeeqsContainerHost = zeeqsContainer.host
-        val zeeqsContainerPort = zeeqsContainer.getMappedPort(zeeqsPort)
-
-        zeeqsVerifications = ZeeqsVerifications(zeeqsEndpoint = "$zeeqsContainerHost:$zeeqsContainerPort/graphql")
+    override fun beforeAll() {
+        if (reuseEnvironment) {
+            environment.setup()
+        }
     }
 
-    override fun cleanUp() {
-        logger.debug("Closing resources")
-        closingSteps.toList().reversed().forEach(AutoCloseable::close)
+    override fun beforeEach() {
+        if (!reuseEnvironment) {
+            environment.setup()
+        }
+    }
 
-        logger.debug("Closed resources")
+    override fun afterEach() {
+        if (!reuseEnvironment) {
+            environment.cleanUp()
+        }
+    }
+
+    override fun afterAll() {
+        if (reuseEnvironment) {
+            environment.cleanUp()
+        }
     }
 
     override fun deployWorkflow(name: String, bpmnXml: InputStream) {
         logger.debug("Deploying a BPMN. [name: {}]", name)
 
-        client.newDeployCommand()
+        environment.client.newDeployCommand()
                 .addResourceStream(bpmnXml, name)
                 .send()
                 .join()
@@ -96,7 +50,7 @@ class ZeebeRunner : TestRunner {
     override fun createWorkflowInstance(bpmnProcessId: String, variables: String): WorkflowInstanceContext {
         logger.debug("Creating a workflow instance. [BPMN-process-id: {}, variables: {}]", bpmnProcessId, variables)
 
-        val response = client.newCreateInstanceCommand()
+        val response = environment.client.newCreateInstanceCommand()
                 .bpmnProcessId(bpmnProcessId)
                 .latestVersion().variables(variables)
                 .send()
@@ -110,7 +64,7 @@ class ZeebeRunner : TestRunner {
     override fun completeTask(jobType: String, variables: String) {
         logger.debug("Starting a job worker to complete jobs. [job-type: {}, variables: {}]", jobType, variables)
 
-        client.newWorker()
+        environment.client.newWorker()
                 .jobType(jobType)
                 .handler { jobClient, job ->
                     jobClient.newCompleteCommand(job.key)
@@ -126,7 +80,7 @@ class ZeebeRunner : TestRunner {
         logger.debug("Publishing a message. [name: {}, correlation-key: {}, variables: {}]",
                 messageName, correlationKey, variables)
 
-        client.newPublishMessageCommand()
+        environment.client.newPublishMessageCommand()
                 .messageName(messageName)
                 .correlationKey(correlationKey)
                 .variables(variables)
@@ -139,7 +93,7 @@ class ZeebeRunner : TestRunner {
         logger.debug("Starting a job worker to throw errors. [job-type: {}, error-code: {}, error-message: {}]",
                 jobType, errorCode, errorMessage)
 
-        client.newWorker()
+        environment.client.newWorker()
                 .jobType(jobType)
                 .handler { jobClient, job ->
                     jobClient.newThrowErrorCommand(job.key)
@@ -157,21 +111,21 @@ class ZeebeRunner : TestRunner {
 
         logger.debug("Cancelling a workflow instance. [key: {}]", wfContext.workflowInstanceKey)
 
-        client.newCancelInstanceCommand(wfContext.workflowInstanceKey)
+        environment.client.newCancelInstanceCommand(wfContext.workflowInstanceKey)
                 .send()
                 .join()
     }
 
     override fun getWorkflowInstanceContexts(): List<WorkflowInstanceContext> {
 
-        return zeeqsVerifications.getWorkflowInstanceKeys()
+        return environment.zeeqs.getWorkflowInstanceKeys()
                 .map { ZeebeWorkflowInstanceContext(workflowInstanceKey = it) }
     }
 
     override fun getWorkflowInstanceState(context: WorkflowInstanceContext): WorkflowInstanceState {
         val wfContext = context as ZeebeWorkflowInstanceContext
 
-        val state = zeeqsVerifications.getWorkflowInstanceState(wfContext.workflowInstanceKey)
+        val state = environment.zeeqs.getWorkflowInstanceState(wfContext.workflowInstanceKey)
         return when (state) {
             "COMPLETED" -> WorkflowInstanceState.COMPLETED
             "TERMINATED" -> WorkflowInstanceState.TERMINATED
@@ -183,7 +137,7 @@ class ZeebeRunner : TestRunner {
     override fun getElementInstances(context: WorkflowInstanceContext): List<ElementInstance> {
         val wfContext = context as ZeebeWorkflowInstanceContext
 
-        return zeeqsVerifications.getElementInstances(workflowInstanceKey = wfContext.workflowInstanceKey).map {
+        return environment.zeeqs.getElementInstances(workflowInstanceKey = wfContext.workflowInstanceKey).map {
             ElementInstance(
                     elementId = it.elementId,
                     elementName = it.elementName,
@@ -200,7 +154,7 @@ class ZeebeRunner : TestRunner {
     override fun getWorkflowInstanceVariables(context: WorkflowInstanceContext): List<WorkflowInstanceVariable> {
         val wfContext = context as ZeebeWorkflowInstanceContext
 
-        return zeeqsVerifications.getWorkflowInstanceVariables(workflowInstanceKey = wfContext.workflowInstanceKey)
+        return environment.zeeqs.getWorkflowInstanceVariables(workflowInstanceKey = wfContext.workflowInstanceKey)
                 .map {
                     WorkflowInstanceVariable(
                             variableName = it.name,
@@ -214,7 +168,7 @@ class ZeebeRunner : TestRunner {
     override fun getIncidents(context: WorkflowInstanceContext): List<Incident> {
         val wfContext = context as ZeebeWorkflowInstanceContext
 
-        return zeeqsVerifications.getIncidents(workflowInstanceKey = wfContext.workflowInstanceKey)
+        return environment.zeeqs.getIncidents(workflowInstanceKey = wfContext.workflowInstanceKey)
                 .map {
                     Incident(
                             errorType = it.errorType,
@@ -229,7 +183,5 @@ class ZeebeRunner : TestRunner {
                     )
                 }
     }
-
-    class ZeeqsContainer(version: String) : GenericContainer<ZeeqsContainer>("camunda/zeeqs:$version")
 
 }

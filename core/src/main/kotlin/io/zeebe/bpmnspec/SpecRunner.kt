@@ -26,11 +26,15 @@ class SpecRunner(
         val spec = specDeserializer.readSpec(input)
 
         logger.debug("Running {} tests", spec.testCases.size)
+        testRunner.beforeAll()
+
         val testResults = spec.testCases.map {
             runTestCase(
                     resources = spec.resources,
                     testcase = it)
         }
+
+        testRunner.afterAll()
 
         logger.debug("All tests finished [{}/{} passed]",
                 testResults.filter { it.success }.count(),
@@ -44,7 +48,7 @@ class SpecRunner(
 
     fun runTestCase(resources: List<String>, testcase: TestCase): TestResult {
         logger.debug("Preparing the test [name: '{}']", testcase.name)
-        testRunner.init()
+        testRunner.beforeEach()
 
         logger.debug("Deploying resources for the test. [name: '{}', resources: {}]", testcase.name, resources.joinToString())
         resources.forEach { resourceName ->
@@ -57,7 +61,7 @@ class SpecRunner(
 
         logger.debug("Test finished [name: '{}', success: '{}', message: '{}']", testcase.name, result.success, result.message)
 
-        testRunner.cleanUp()
+        testRunner.afterEach()
 
         return result
     }

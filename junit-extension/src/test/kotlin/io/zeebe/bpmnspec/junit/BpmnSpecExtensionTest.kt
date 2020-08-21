@@ -1,7 +1,7 @@
 package io.zeebe.bpmnspec.junit
 
 import io.zeebe.bpmnspec.SpecRunner
-import io.zeebe.bpmnspec.runner.zeebe.ZeebeRunner
+import io.zeebe.bpmnspec.runner.zeebe.ZeebeTestRunner
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.TestTemplate
 import org.junit.jupiter.api.extension.ExtendWith
@@ -13,7 +13,7 @@ class BpmnSpecExtensionTest {
     val classpathDir = Path.of(resource.toURI()).parent
 
     val runner = SpecRunner(
-            testRunner = ZeebeRunner(),
+            testRunner = ZeebeTestRunner(),
             resourceDirectory = classpathDir)
 
     @TestTemplate

@@ -5,9 +5,13 @@ import java.io.InputStream
 
 interface TestRunner {
 
-    fun init()
+    fun beforeAll()
 
-    fun cleanUp()
+    fun beforeEach()
+
+    fun afterEach()
+
+    fun afterAll()
 
     fun deployWorkflow(name: String, bpmnXml: InputStream)
 

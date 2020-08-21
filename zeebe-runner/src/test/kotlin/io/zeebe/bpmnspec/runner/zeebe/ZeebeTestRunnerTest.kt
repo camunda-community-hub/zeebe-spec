@@ -7,16 +7,16 @@ import org.awaitility.kotlin.await
 import org.junit.jupiter.api.Test
 import java.nio.file.Path
 
-class ZeebeRunnerTest {
+class ZeebeTestRunnerTest {
 
     @Test
     fun `ZeebeRunner should work standalone`() {
 
-        val runner = ZeebeRunner()
+        val runner = ZeebeTestRunner()
 
-        runner.init()
+        runner.beforeEach()
 
-        val bpmnXml = ZeebeRunnerTest::class.java.getResourceAsStream("/demo.bpmn")
+        val bpmnXml = ZeebeTestRunnerTest::class.java.getResourceAsStream("/demo.bpmn")
         runner.deployWorkflow("demo.bpmn", bpmnXml)
 
         val wfContext = runner.createWorkflowInstance("demo", "{}")
@@ -30,20 +30,20 @@ class ZeebeRunnerTest {
                     .isEqualTo(WorkflowInstanceState.COMPLETED)
         }
 
-        runner.cleanUp()
+        runner.afterEach()
     }
 
     @Test
     fun `Runner with ZeebeTestRunner should run the spec`() {
 
-        val classpathDir = ZeebeRunnerTest::class.java.getResource("/demo.yaml")
+        val classpathDir = ZeebeTestRunnerTest::class.java.getResource("/demo.yaml")
         val classpath = Path.of(classpathDir.toURI()).parent
 
         val runner = SpecRunner(
-                testRunner = ZeebeRunner(),
+                testRunner = ZeebeTestRunner(),
                 resourceDirectory = classpath)
 
-        val spec = ZeebeRunnerTest::class.java.getResourceAsStream("/demo.yaml")
+        val spec = ZeebeTestRunnerTest::class.java.getResourceAsStream("/demo.yaml")
         val result = runner.run(spec)
 
         assertThat(result.testResults).hasSize(1)
@@ -52,14 +52,14 @@ class ZeebeRunnerTest {
     @Test
     fun `should run the spec with message`() {
 
-        val classpathDir = ZeebeRunnerTest::class.java.getResource("/demo3.yaml")
+        val classpathDir = ZeebeTestRunnerTest::class.java.getResource("/demo3.yaml")
         val classpath = Path.of(classpathDir.toURI()).parent
 
         val runner = SpecRunner(
-                testRunner = ZeebeRunner(),
+                testRunner = ZeebeTestRunner(),
                 resourceDirectory = classpath)
 
-        val spec = ZeebeRunnerTest::class.java.getResourceAsStream("/demo3.yaml")
+        val spec = ZeebeTestRunnerTest::class.java.getResourceAsStream("/demo3.yaml")
         val result = runner.run(spec)
 
         assertThat(result.testResults).hasSize(1)
@@ -68,14 +68,14 @@ class ZeebeRunnerTest {
     @Test
     fun `should run the spec with incident`() {
 
-        val classpathDir = ZeebeRunnerTest::class.java.getResource("/demo-incident.yaml")
+        val classpathDir = ZeebeTestRunnerTest::class.java.getResource("/demo-incident.yaml")
         val classpath = Path.of(classpathDir.toURI()).parent
 
         val runner = SpecRunner(
-                testRunner = ZeebeRunner(),
+                testRunner = ZeebeTestRunner(),
                 resourceDirectory = classpath)
 
-        val spec = ZeebeRunnerTest::class.java.getResourceAsStream("/demo-incident.yaml")
+        val spec = ZeebeTestRunnerTest::class.java.getResourceAsStream("/demo-incident.yaml")
         val result = runner.run(spec)
 
         assertThat(result.testResults).hasSize(1)
