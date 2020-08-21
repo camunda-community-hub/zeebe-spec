@@ -1,8 +1,8 @@
 package io.zeebe.bpmnspec
 
-import io.zeebe.bpmnspec.api.actions.CompleteTaskAction
-import io.zeebe.bpmnspec.api.actions.CreateInstanceAction
-import io.zeebe.bpmnspec.api.verifications.WorkflowInstanceStateVerification
+import io.zeebe.bpmnspec.actions.CompleteTaskAction
+import io.zeebe.bpmnspec.actions.CreateInstanceAction
+import io.zeebe.bpmnspec.verifications.WorkflowInstanceStateVerification
 import io.zeebe.bpmnspec.format.SpecDeserializer
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test

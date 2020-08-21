@@ -1,4 +1,4 @@
-package io.zeebe.bpmnspec.api.actions
+package io.zeebe.bpmnspec.actions
 
 import io.zeebe.bpmnspec.api.Action
 import io.zeebe.bpmnspec.api.runner.TestRunner

@@ -1,4 +1,4 @@
-package io.zeebe.bpmnspec.api.verifications
+package io.zeebe.bpmnspec.verifications
 
 import io.zeebe.bpmnspec.api.Verification
 import io.zeebe.bpmnspec.api.VerificationResult

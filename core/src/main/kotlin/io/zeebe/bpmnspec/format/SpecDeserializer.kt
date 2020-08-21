@@ -4,11 +4,11 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.fasterxml.jackson.module.kotlin.readValue
-import io.zeebe.bpmnspec.api.actions.*
+import io.zeebe.bpmnspec.actions.*
 import io.zeebe.bpmnspec.api.runner.ElementInstanceState
 import io.zeebe.bpmnspec.api.runner.IncidentState
 import io.zeebe.bpmnspec.api.runner.WorkflowInstanceState
-import io.zeebe.bpmnspec.api.verifications.*
+import io.zeebe.bpmnspec.verifications.*
 import java.io.InputStream
 
 class SpecDeserializer {
