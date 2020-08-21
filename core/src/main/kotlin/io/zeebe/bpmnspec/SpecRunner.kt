@@ -11,14 +11,14 @@ import java.time.Instant
 
 class SpecRunner(
         val testRunner: TestRunner,
-        val resourceDirectory: Path = Path.of("."),
+        val resourceResolver: ResourceResolver = DirectoryResourceResolver(rootDirectory = Path.of(".")),
         val verificationTimeout: Duration = Duration.ofSeconds(10),
         val verificationRetryInterval: Duration = Duration.ofMillis(10)
 ) {
 
-    val logger = LoggerFactory.getLogger(SpecRunner::class.java)
+    private val logger = LoggerFactory.getLogger(SpecRunner::class.java)
 
-    val specDeserializer = SpecDeserializer()
+    private val specDeserializer = SpecDeserializer()
 
     fun run(input: InputStream): TestSpecResult {
 
@@ -52,7 +52,7 @@ class SpecRunner(
 
         logger.debug("Deploying resources for the test. [name: '{}', resources: {}]", testcase.name, resources.joinToString())
         resources.forEach { resourceName ->
-            val resourceStream = resourceDirectory.resolve(resourceName).toFile().inputStream()
+            val resourceStream = resourceResolver.getResource(resourceName)
             testRunner.deployWorkflow(resourceName, resourceStream)
         }
 

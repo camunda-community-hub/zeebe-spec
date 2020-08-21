@@ -14,13 +14,10 @@ testCases:
           variables: '{"x":8}'
 
     verifications:
-      - verification: workflow-instance-state
-        args:
-          state: completed
       - verification: element-instance-state
         args:
           element_name: B
-          state: completed
+          state: activated
 
   - name: default-flow
     description: take the default flow
@@ -34,10 +31,7 @@ testCases:
           variables: '{"x":3}'
 
     verifications:
-      - verification: workflow-instance-state
-        args:
-          state: completed
       - verification: element-instance-state
         args:
           element_name: C
-          state: completed
+          state: activated
