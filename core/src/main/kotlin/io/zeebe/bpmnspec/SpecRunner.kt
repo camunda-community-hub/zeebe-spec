@@ -78,6 +78,8 @@ class SpecRunner(
 
         val start = Instant.now()
 
+        val successfulVerifications = mutableListOf<Verification>()
+
         for (verification in testcase.verifications) {
 
             var result: VerificationResult
@@ -92,11 +94,15 @@ class SpecRunner(
                 }
             } while (shouldRetry)
 
-            if (!result.isFulfilled) {
+            if (result.isFulfilled) {
+                successfulVerifications.add(verification)
+            } else {
                 return TestResult(
                         testCase = testcase,
                         success = false,
-                        message = result.failureMessage
+                        message = result.failureMessage,
+                        successfulVerifications = successfulVerifications.toList(),
+                        failedVerification = verification
                 )
             }
         }
@@ -104,7 +110,8 @@ class SpecRunner(
         return TestResult(
                 testCase = testcase,
                 success = true,
-                message = ""
+                message = "",
+                successfulVerifications = successfulVerifications.toList()
         )
     }
 

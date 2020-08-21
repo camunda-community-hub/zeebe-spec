@@ -65,4 +65,21 @@ class ZeebeTestRunnerTest {
         assertThat(result.testResults).hasSize(1)
     }
 
+    @Test
+    fun `should fail verification`() {
+
+        val spec = ZeebeTestRunnerTest::class.java.getResourceAsStream("/failed-test-case.yaml")
+        val result = specRunner.run(spec)
+
+        assertThat(result.testResults).hasSize(1)
+
+        val testResult = result.testResults[0]
+        assertThat(testResult.success).isFalse()
+        assertThat(testResult.message).isEqualTo("Expected the element with name 'B'  to be in state 'COMPLETED' but was 'ACTIVATED'.")
+
+        assertThat(testResult.testCase.verifications).hasSize(3)
+        assertThat(testResult.successfulVerifications).containsExactly(testResult.testCase.verifications[0])
+        assertThat(testResult.failedVerification).isEqualTo(testResult.testCase.verifications[1])
+    }
+
 }
