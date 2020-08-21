@@ -2,7 +2,6 @@ package io.zeebe.bpmnspec.runner.zeebe
 
 import io.zeebe.bpmnspec.runner.zeebe.zeeqs.ZeeqsVerifications
 import io.zeebe.client.ZeebeClient
-import io.zeebe.client.api.worker.JobWorker
 import io.zeebe.containers.ZeebeBrokerContainer
 import io.zeebe.containers.ZeebePort
 import org.slf4j.LoggerFactory
@@ -15,63 +14,88 @@ class ZeebeEnvironment {
 
     private val logger = LoggerFactory.getLogger(ZeebeTestRunner::class.java)
 
-    val hazelcastPort = 5701
-    val hazelcastHost = "zeebe"
-    val zeeqsPort = 9000
+    val zeebeImage = "camunda/zeebe-with-hazelcast-exporter"
+    val zeebeImageVersion: String = "0.24.2-0.10.0-alpha1"
+
+    val zeeqsImage = "camunda/zeeqs"
+    val zeeqsImageVersion: String = "1.0.0-alpha2"
+
+    private val zeebeHost = "zeebe"
+    private val hazelcastPort = 5701
+    private val zeeqsGraphqlPort = 9000
 
     private val closingSteps = mutableListOf<AutoCloseable>()
 
-    lateinit var client: ZeebeClient
+    lateinit var zeebeClient: ZeebeClient
     lateinit var zeeqs: ZeeqsVerifications
-
-
-    class ZeeqsContainer(version: String) : GenericContainer<ZeeqsContainer>("camunda/zeeqs:$version")
 
     fun setup() {
         val network = Network.newNetwork()
         closingSteps.add(network)
 
-        val zeebeContainer = ZeebeBrokerContainer("camunda/zeebe-with-hazelcast-exporter", "0.24.2-0.10.0-alpha1")
+        val zeebeContainer = ZeebeBrokerContainer(zeebeImage, zeebeImageVersion)
                 .withClasspathResourceMapping("application.yaml", "/usr/local/zeebe/config/application.yaml", BindMode.READ_ONLY)
                 .withExposedPorts(hazelcastPort)
                 .withNetwork(network)
-                .withNetworkAliases(hazelcastHost)
+                .withNetworkAliases(zeebeHost)
 
         logger.debug("Starting the Zeebe container [image: {}]", zeebeContainer.dockerImageName)
-        zeebeContainer.start()
+        try {
+            zeebeContainer.start()
+        } catch (e: Exception) {
+            logger.error("Failed to start the Zeebe container", e)
+            logger.debug("Zeebe container output: {}", zeebeContainer.logs)
+
+            throw RuntimeException("Failed to start the Zeebe container", e)
+        }
 
         logger.debug("Started the Zeebe container")
         closingSteps.add(zeebeContainer)
 
         val zeebeGatewayPort = zeebeContainer.getExternalAddress(ZeebePort.GATEWAY)
 
-        client = ZeebeClient
+        zeebeClient = ZeebeClient
                 .newClientBuilder()
                 .brokerContactPoint(zeebeGatewayPort)
                 .usePlaintext()
                 .build()
 
-        closingSteps.add(client)
+        closingSteps.add(zeebeClient)
 
         // verify that the client is connected
-        client.newTopologyRequest().send().join()
+        try {
+            zeebeClient.newTopologyRequest().send().join()
+        } catch (e: Exception) {
+            logger.error("Failed to connect the Zeebe client", e)
+            logger.debug("Zeebe container output: {}", zeebeContainer.logs)
 
-        val zeeqsContainer = ZeeqsContainer("1.0.0-alpha2")
-                .withEnv("zeebe.hazelcast.connection", "$hazelcastHost:$hazelcastPort")
-                .withExposedPorts(zeeqsPort)
+            throw RuntimeException("Failed to connect the Zeebe client", e)
+        }
+
+        val zeeqsContainer = ZeeqsContainer(zeeqsImage, zeeqsImageVersion)
+                .withEnv("zeebe.hazelcast.connection", "$zeebeHost:$hazelcastPort")
+                .withExposedPorts(zeeqsGraphqlPort)
                 .dependsOn(zeebeContainer)
                 .waitingFor(Wait.forHttp("/actuator/health"))
                 .withNetwork(network)
                 .withNetworkAliases("zeeqs")
 
         logger.debug("Starting the ZeeQS container [image: {}]", zeeqsContainer.dockerImageName)
-        zeeqsContainer.start()
+        try {
+            zeeqsContainer.start()
+        } catch (e: Exception) {
+            logger.error("Failed to start the ZeeQS container", e)
+            logger.debug("Zeebe container output: {}", zeebeContainer.logs)
+            logger.debug("ZeeQS container output: {}", zeeqsContainer.logs)
+
+            throw RuntimeException("Failed to start the ZeeQS container", e)
+        }
 
         logger.debug("Started the ZeeQS container")
         closingSteps.add(zeeqsContainer)
 
         val zeeqsContainerHost = zeeqsContainer.host
-        val zeeqsContainerPort = zeeqsContainer.getMappedPort(zeeqsPort)
+        val zeeqsContainerPort = zeeqsContainer.getMappedPort(zeeqsGraphqlPort)
 
         zeeqs = ZeeqsVerifications(zeeqsEndpoint = "$zeeqsContainerHost:$zeeqsContainerPort/graphql")
     }
@@ -82,5 +106,7 @@ class ZeebeEnvironment {
 
         logger.debug("Closed resources")
     }
+
+    class ZeeqsContainer(imageName: String, version: String) : GenericContainer<ZeeqsContainer>("$imageName:$version")
 
 }

@@ -45,7 +45,7 @@ class ZeebeTestRunner(
     override fun deployWorkflow(name: String, bpmnXml: InputStream) {
         logger.debug("Deploying a BPMN. [name: {}]", name)
 
-        environment.client.newDeployCommand()
+        environment.zeebeClient.newDeployCommand()
                 .addResourceStream(bpmnXml, name)
                 .send()
                 .join()
@@ -54,7 +54,7 @@ class ZeebeTestRunner(
     override fun createWorkflowInstance(bpmnProcessId: String, variables: String): WorkflowInstanceContext {
         logger.debug("Creating a workflow instance. [BPMN-process-id: {}, variables: {}]", bpmnProcessId, variables)
 
-        val response = environment.client.newCreateInstanceCommand()
+        val response = environment.zeebeClient.newCreateInstanceCommand()
                 .bpmnProcessId(bpmnProcessId)
                 .latestVersion().variables(variables)
                 .send()
@@ -68,7 +68,7 @@ class ZeebeTestRunner(
     override fun completeTask(jobType: String, variables: String) {
         logger.debug("Starting a job worker to complete jobs. [job-type: {}, variables: {}]", jobType, variables)
 
-        val jobWorker = environment.client.newWorker()
+        val jobWorker = environment.zeebeClient.newWorker()
                 .jobType(jobType)
                 .handler { jobClient, job ->
                     jobClient.newCompleteCommand(job.key)
@@ -86,7 +86,7 @@ class ZeebeTestRunner(
         logger.debug("Publishing a message. [name: {}, correlation-key: {}, variables: {}]",
                 messageName, correlationKey, variables)
 
-        environment.client.newPublishMessageCommand()
+        environment.zeebeClient.newPublishMessageCommand()
                 .messageName(messageName)
                 .correlationKey(correlationKey)
                 .variables(variables)
@@ -99,7 +99,7 @@ class ZeebeTestRunner(
         logger.debug("Starting a job worker to throw errors. [job-type: {}, error-code: {}, error-message: {}]",
                 jobType, errorCode, errorMessage)
 
-        val jobWorker = environment.client.newWorker()
+        val jobWorker = environment.zeebeClient.newWorker()
                 .jobType(jobType)
                 .handler { jobClient, job ->
                     jobClient.newThrowErrorCommand(job.key)
@@ -119,7 +119,7 @@ class ZeebeTestRunner(
 
         logger.debug("Cancelling a workflow instance. [key: {}]", wfContext.workflowInstanceKey)
 
-        environment.client.newCancelInstanceCommand(wfContext.workflowInstanceKey)
+        environment.zeebeClient.newCancelInstanceCommand(wfContext.workflowInstanceKey)
                 .send()
                 .join()
     }
