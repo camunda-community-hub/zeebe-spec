@@ -10,8 +10,8 @@ import java.util.function.Consumer
 
 class ZeebeTestRunner(
         private val reuseEnvironment: Boolean = false,
-        private val beforeEachCallback: Consumer<ZeebeTestContext> = Consumer {},
-        private val afterEachCallback: Consumer<ZeebeTestContext> = Consumer {}
+        private val beforeEachCallback: (ZeebeTestContext) -> Unit = {},
+        private val afterEachCallback: (ZeebeTestContext) -> Unit = {}
 ) : TestRunner {
 
     private val logger = LoggerFactory.getLogger(ZeebeTestRunner::class.java)
@@ -30,14 +30,14 @@ class ZeebeTestRunner(
             environment.setup()
         }
         val testContext = ZeebeTestContext(zeebeClient = environment.zeebeClient)
-        beforeEachCallback.accept(testContext)
+        beforeEachCallback(testContext)
     }
 
     override fun afterEach() {
         jobWorkers.map(JobWorker::close)
 
         val testContext = ZeebeTestContext(zeebeClient = environment.zeebeClient)
-        afterEachCallback.accept(testContext)
+        afterEachCallback(testContext)
 
         if (!reuseEnvironment) {
             environment.cleanUp()
