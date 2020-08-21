@@ -9,13 +9,12 @@ import java.net.http.HttpClient
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
 
-class ZeeqsVerifications(val zeeqsEndpoint: String = "http://localhost:9000/graphql") {
+class ZeeqsClient(val zeeqsEndpoint: String = "http://localhost:9000/graphql") {
 
-    val logger = LoggerFactory.getLogger(ZeeqsVerifications::class.java)
+    private val logger = LoggerFactory.getLogger(ZeeqsClient::class.java)
 
-    val httpClient = HttpClient.newHttpClient()
-
-    val objectMapper = ObjectMapper().registerModule(KotlinModule())
+    private val httpClient = HttpClient.newHttpClient()
+    private val objectMapper = ObjectMapper().registerModule(KotlinModule())
 
     fun getWorkflowInstanceKeys(): List<Long> {
 
@@ -25,12 +24,12 @@ class ZeeqsVerifications(val zeeqsEndpoint: String = "http://localhost:9000/grap
         return response.data.workflowInstances.nodes.map { it.key.toLong()  }
     }
 
-    fun getWorkflowInstanceState(workflowInstanceKey: Long): String {
+    fun getWorkflowInstanceState(workflowInstanceKey: Long): String? {
 
         val responseBody = sendRequest("{ workflowInstance(key: $workflowInstanceKey) { key, state } }")
         val response = objectMapper.readValue<WorkflowInstanceResponse>(responseBody)
 
-        return response.data.workflowInstance.state
+        return response.data.workflowInstance?.state
     }
 
     fun getElementInstances(workflowInstanceKey: Long): List<ElementInstanceDto> {
@@ -38,7 +37,7 @@ class ZeeqsVerifications(val zeeqsEndpoint: String = "http://localhost:9000/grap
         val responseBody = sendRequest("{ workflowInstance(key: $workflowInstanceKey) { elementInstances { elementId, elementName, state } } }")
         val response = objectMapper.readValue<ElementInstancesResponse>(responseBody)
 
-        return response.data.workflowInstance.elementInstances
+        return response.data.workflowInstance?.elementInstances ?: emptyList()
     }
 
     fun getWorkflowInstanceVariables(workflowInstanceKey: Long): List<VariableDto> {
@@ -46,7 +45,7 @@ class ZeeqsVerifications(val zeeqsEndpoint: String = "http://localhost:9000/grap
         val responseBody = sendRequest("{ workflowInstance(key: $workflowInstanceKey) { variables { name, value, scope { elementId, elementName } } } }")
         val response = objectMapper.readValue<VariablesResponse>(responseBody)
 
-        return response.data.workflowInstance.variables
+        return response.data.workflowInstance?.variables ?: emptyList()
     }
 
     fun getIncidents(workflowInstanceKey: Long): List<IncidentDto> {
@@ -54,7 +53,7 @@ class ZeeqsVerifications(val zeeqsEndpoint: String = "http://localhost:9000/grap
         val responseBody = sendRequest("{ workflowInstance(key: $workflowInstanceKey) { incidents { errorType, errorMessage, state, elementInstance { elementId, elementName } } } }")
         val response = objectMapper.readValue<IncidentsResponse>(responseBody)
 
-        return response.data.workflowInstance.incidents
+        return response.data.workflowInstance?.incidents ?: emptyList()
     }
 
     private fun sendRequest(query: String): String {
@@ -84,7 +83,7 @@ class ZeeqsVerifications(val zeeqsEndpoint: String = "http://localhost:9000/grap
     }
 
     data class WorkflowInstanceResponse(val data: WorkflowInstanceDataDto)
-    data class WorkflowInstanceDataDto(val workflowInstance: WorkflowInstanceDto)
+    data class WorkflowInstanceDataDto(val workflowInstance: WorkflowInstanceDto?)
     data class WorkflowInstanceDto(val key: String, val state: String)
 
     data class WorkflowInstancesResponse(val data: WorkflowInstancesDataDto)
@@ -92,19 +91,19 @@ class ZeeqsVerifications(val zeeqsEndpoint: String = "http://localhost:9000/grap
     data class WorkflowInstancesDto(val nodes: List<WorkflowInstanceDto>)
 
     data class ElementInstancesResponse(val data: ElementInstancesDataDto)
-    data class ElementInstancesDataDto(val workflowInstance: ElementInstancesDto)
+    data class ElementInstancesDataDto(val workflowInstance: ElementInstancesDto?)
     data class ElementInstancesDto(val elementInstances: List<ElementInstanceDto>)
     data class ElementInstanceDto(val state: String, val elementId: String, val elementName: String?)
 
     data class VariablesResponse(val data: VariablesDataDto)
-    data class VariablesDataDto(val workflowInstance: VariablesDto)
+    data class VariablesDataDto(val workflowInstance: VariablesDto?)
     data class VariablesDto(val variables: List<VariableDto>)
-    data class VariableDto(val name: String, val value: String, val scope: VariableScopeDto)
+    data class VariableDto(val name: String, val value: String, val scope: VariableScopeDto?)
     data class VariableScopeDto(val elementId: String, val elementName: String?)
 
     data class IncidentsResponse(val data: IncidentsDataDto)
-    data class IncidentsDataDto(val workflowInstance: IncidentsDto)
+    data class IncidentsDataDto(val workflowInstance: IncidentsDto?)
     data class IncidentsDto(val incidents: List<IncidentDto>)
-    data class IncidentDto(val errorType: String, val errorMessage: String?, val state: String, val elementInstance: IncidentElementInstanceDto)
+    data class IncidentDto(val errorType: String, val errorMessage: String?, val state: String, val elementInstance: IncidentElementInstanceDto?)
     data class IncidentElementInstanceDto(val elementId: String, val elementName: String?)
 }

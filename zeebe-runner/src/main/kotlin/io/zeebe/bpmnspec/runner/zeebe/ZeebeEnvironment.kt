@@ -1,6 +1,6 @@
 package io.zeebe.bpmnspec.runner.zeebe
 
-import io.zeebe.bpmnspec.runner.zeebe.zeeqs.ZeeqsVerifications
+import io.zeebe.bpmnspec.runner.zeebe.zeeqs.ZeeqsClient
 import io.zeebe.client.ZeebeClient
 import io.zeebe.containers.ZeebeBrokerContainer
 import io.zeebe.containers.ZeebePort
@@ -27,7 +27,7 @@ class ZeebeEnvironment {
     private val closingSteps = mutableListOf<AutoCloseable>()
 
     lateinit var zeebeClient: ZeebeClient
-    lateinit var zeeqs: ZeeqsVerifications
+    lateinit var zeeqsClient: ZeeqsClient
 
     fun setup() {
         val network = Network.newNetwork()
@@ -97,7 +97,7 @@ class ZeebeEnvironment {
         val zeeqsContainerHost = zeeqsContainer.host
         val zeeqsContainerPort = zeeqsContainer.getMappedPort(zeeqsGraphqlPort)
 
-        zeeqs = ZeeqsVerifications(zeeqsEndpoint = "$zeeqsContainerHost:$zeeqsContainerPort/graphql")
+        zeeqsClient = ZeeqsClient(zeeqsEndpoint = "$zeeqsContainerHost:$zeeqsContainerPort/graphql")
     }
 
     fun cleanUp() {

@@ -126,14 +126,14 @@ class ZeebeTestRunner(
 
     override fun getWorkflowInstanceContexts(): List<WorkflowInstanceContext> {
 
-        return environment.zeeqs.getWorkflowInstanceKeys()
+        return environment.zeeqsClient.getWorkflowInstanceKeys()
                 .map { ZeebeWorkflowInstanceContext(workflowInstanceKey = it) }
     }
 
     override fun getWorkflowInstanceState(context: WorkflowInstanceContext): WorkflowInstanceState {
         val wfContext = context as ZeebeWorkflowInstanceContext
 
-        val state = environment.zeeqs.getWorkflowInstanceState(wfContext.workflowInstanceKey)
+        val state = environment.zeeqsClient.getWorkflowInstanceState(wfContext.workflowInstanceKey)
         return when (state) {
             "COMPLETED" -> WorkflowInstanceState.COMPLETED
             "TERMINATED" -> WorkflowInstanceState.TERMINATED
@@ -145,7 +145,7 @@ class ZeebeTestRunner(
     override fun getElementInstances(context: WorkflowInstanceContext): List<ElementInstance> {
         val wfContext = context as ZeebeWorkflowInstanceContext
 
-        return environment.zeeqs.getElementInstances(workflowInstanceKey = wfContext.workflowInstanceKey).map {
+        return environment.zeeqsClient.getElementInstances(workflowInstanceKey = wfContext.workflowInstanceKey).map {
             ElementInstance(
                     elementId = it.elementId,
                     elementName = it.elementName,
@@ -163,13 +163,13 @@ class ZeebeTestRunner(
     override fun getWorkflowInstanceVariables(context: WorkflowInstanceContext): List<WorkflowInstanceVariable> {
         val wfContext = context as ZeebeWorkflowInstanceContext
 
-        return environment.zeeqs.getWorkflowInstanceVariables(workflowInstanceKey = wfContext.workflowInstanceKey)
+        return environment.zeeqsClient.getWorkflowInstanceVariables(workflowInstanceKey = wfContext.workflowInstanceKey)
                 .map {
                     WorkflowInstanceVariable(
                             variableName = it.name,
                             variableValue = it.value,
-                            scopeElementId = it.scope.elementId,
-                            scopeElementName = it.scope.elementName
+                            scopeElementId = it.scope?.elementId ?: "",
+                            scopeElementName = it.scope?.elementName ?: ""
                     )
                 }
     }
@@ -177,7 +177,7 @@ class ZeebeTestRunner(
     override fun getIncidents(context: WorkflowInstanceContext): List<Incident> {
         val wfContext = context as ZeebeWorkflowInstanceContext
 
-        return environment.zeeqs.getIncidents(workflowInstanceKey = wfContext.workflowInstanceKey)
+        return environment.zeeqsClient.getIncidents(workflowInstanceKey = wfContext.workflowInstanceKey)
                 .map {
                     Incident(
                             errorType = it.errorType,
@@ -187,8 +187,8 @@ class ZeebeTestRunner(
                                 "RESOLVED" -> IncidentState.RESOLVED
                                 else -> IncidentState.UNKNOWN
                             },
-                            elementId = it.elementInstance.elementId,
-                            elementName = it.elementInstance.elementName
+                            elementId = it.elementInstance?.elementId ?: "",
+                            elementName = it.elementInstance?.elementName ?: ""
                     )
                 }
     }
