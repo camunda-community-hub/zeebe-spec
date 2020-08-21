@@ -6,9 +6,12 @@ import io.zeebe.client.api.worker.JobWorker
 import org.slf4j.LoggerFactory
 import java.io.InputStream
 import java.time.Duration
+import java.util.function.Consumer
 
 class ZeebeTestRunner(
-        private val reuseEnvironment: Boolean = false
+        private val reuseEnvironment: Boolean = false,
+        private val beforeEachCallback: Consumer<ZeebeTestContext> = Consumer {},
+        private val afterEachCallback: Consumer<ZeebeTestContext> = Consumer {}
 ) : TestRunner {
 
     private val logger = LoggerFactory.getLogger(ZeebeTestRunner::class.java)
@@ -26,10 +29,15 @@ class ZeebeTestRunner(
         if (!reuseEnvironment) {
             environment.setup()
         }
+        val testContext = ZeebeTestContext(zeebeClient = environment.zeebeClient)
+        beforeEachCallback.accept(testContext)
     }
 
     override fun afterEach() {
         jobWorkers.map(JobWorker::close)
+
+        val testContext = ZeebeTestContext(zeebeClient = environment.zeebeClient)
+        afterEachCallback.accept(testContext)
 
         if (!reuseEnvironment) {
             environment.cleanUp()
