@@ -2,6 +2,7 @@ package io.zeebe.bpmnspec.runner.zeebe
 
 import io.zeebe.bpmnspec.runner.zeebe.zeeqs.ZeeqsVerifications
 import io.zeebe.client.ZeebeClient
+import io.zeebe.client.api.worker.JobWorker
 import io.zeebe.containers.ZeebeBrokerContainer
 import io.zeebe.containers.ZeebePort
 import org.slf4j.LoggerFactory

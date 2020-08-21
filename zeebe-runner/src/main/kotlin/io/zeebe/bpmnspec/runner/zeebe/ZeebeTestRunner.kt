@@ -2,6 +2,7 @@ package io.zeebe.bpmnspec.runner.zeebe
 
 import io.zeebe.bpmnspec.api.WorkflowInstanceContext
 import io.zeebe.bpmnspec.api.runner.*
+import io.zeebe.client.api.worker.JobWorker
 import org.slf4j.LoggerFactory
 import java.io.InputStream
 import java.time.Duration
@@ -13,6 +14,7 @@ class ZeebeTestRunner(
     private val logger = LoggerFactory.getLogger(ZeebeTestRunner::class.java)
 
     private val environment = ZeebeEnvironment()
+    private val jobWorkers = mutableListOf<JobWorker>()
 
     override fun beforeAll() {
         if (reuseEnvironment) {
@@ -27,6 +29,8 @@ class ZeebeTestRunner(
     }
 
     override fun afterEach() {
+        jobWorkers.map(JobWorker::close)
+
         if (!reuseEnvironment) {
             environment.cleanUp()
         }
@@ -64,7 +68,7 @@ class ZeebeTestRunner(
     override fun completeTask(jobType: String, variables: String) {
         logger.debug("Starting a job worker to complete jobs. [job-type: {}, variables: {}]", jobType, variables)
 
-        environment.client.newWorker()
+        val jobWorker = environment.client.newWorker()
                 .jobType(jobType)
                 .handler { jobClient, job ->
                     jobClient.newCompleteCommand(job.key)
@@ -74,6 +78,8 @@ class ZeebeTestRunner(
                 }
                 .timeout(Duration.ofSeconds(1))
                 .open()
+
+        jobWorkers.add(jobWorker)
     }
 
     override fun publishMessage(messageName: String, correlationKey: String, variables: String) {
@@ -93,7 +99,7 @@ class ZeebeTestRunner(
         logger.debug("Starting a job worker to throw errors. [job-type: {}, error-code: {}, error-message: {}]",
                 jobType, errorCode, errorMessage)
 
-        environment.client.newWorker()
+        val jobWorker = environment.client.newWorker()
                 .jobType(jobType)
                 .handler { jobClient, job ->
                     jobClient.newThrowErrorCommand(job.key)
@@ -104,6 +110,8 @@ class ZeebeTestRunner(
                 }
                 .timeout(Duration.ofSeconds(1))
                 .open()
+
+        jobWorkers.add(jobWorker)
     }
 
     override fun cancelWorkflowInstance(context: WorkflowInstanceContext) {
