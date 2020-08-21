@@ -82,4 +82,23 @@ class ZeebeTestRunnerTest {
         assertThat(testResult.failedVerification).isEqualTo(testResult.testCase.verifications[1])
     }
 
+    @Test
+    fun `should collect output`() {
+
+        val spec = ZeebeTestRunnerTest::class.java.getResourceAsStream("/demo.yaml")
+        val result = specRunner.run(spec)
+
+        assertThat(result.testResults).hasSize(1)
+
+        val testResult = result.testResults[0]
+        assertThat(testResult.success).isTrue()
+        assertThat(testResult.output).hasSize(1)
+
+        val testOutput = testResult.output[0];
+        assertThat(testOutput.state).isEqualTo(WorkflowInstanceState.COMPLETED)
+        assertThat(testOutput.elementInstances).hasSize(10)
+        assertThat(testOutput.variables).isEmpty()
+        assertThat(testOutput.incidents).isEmpty()
+    }
+
 }

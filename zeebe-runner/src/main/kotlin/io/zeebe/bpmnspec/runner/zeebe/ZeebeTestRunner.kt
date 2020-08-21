@@ -145,6 +145,7 @@ class ZeebeTestRunner(
                         "ACTIVATED" -> ElementInstanceState.ACTIVATED
                         "COMPLETED" -> ElementInstanceState.COMPLETED
                         "TERMINATED" -> ElementInstanceState.TERMINATED
+                        "TAKEN" -> ElementInstanceState.TAKEN
                         else -> ElementInstanceState.UNKNOWN
                     }
             )

@@ -4,5 +4,6 @@ enum class ElementInstanceState {
     UNKNOWN,
     ACTIVATED,
     COMPLETED,
-    TERMINATED
+    TERMINATED,
+    TAKEN
 }

@@ -5,5 +5,6 @@ data class TestResult(
         val success: Boolean,
         val message: String,
         val successfulVerifications: List<Verification>,
-        val failedVerification: Verification? = null
+        val failedVerification: Verification? = null,
+        val output: List<TestOutput>
 )

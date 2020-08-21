@@ -102,7 +102,8 @@ class SpecRunner(
                         success = false,
                         message = result.failureMessage,
                         successfulVerifications = successfulVerifications.toList(),
-                        failedVerification = verification
+                        failedVerification = verification,
+                        output = collectTestOutput()
                 )
             }
         }
@@ -111,8 +112,21 @@ class SpecRunner(
                 testCase = testcase,
                 success = true,
                 message = "",
-                successfulVerifications = successfulVerifications.toList()
+                successfulVerifications = successfulVerifications.toList(),
+                output = collectTestOutput()
         )
+    }
+
+    private fun collectTestOutput(): List<TestOutput> {
+        return testRunner.getWorkflowInstanceContexts().map { context ->
+            TestOutput(
+                    context = context,
+                    state = testRunner.getWorkflowInstanceState(context),
+                    elementInstances = testRunner.getElementInstances(context),
+                    variables = testRunner.getWorkflowInstanceVariables(context),
+                    incidents = testRunner.getIncidents(context)
+            )
+        }
     }
 
 
