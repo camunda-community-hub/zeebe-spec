@@ -6,6 +6,8 @@ import io.zeebe.bpmnspec.runner.zeebe.ZeebeTestRunner
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.TestTemplate
 import org.junit.jupiter.api.extension.ExtendWith
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.ArgumentsSource
 
 class BpmnSpecExtensionTest {
 
@@ -29,6 +31,17 @@ class BpmnSpecExtensionTest {
     @ExtendWith(BpmnSpecContextProvider::class)
     @BpmnSpec(specResource = "boundary-event-spec.yaml")
     fun `boundary event`(spec: BpmnSpecTestCase) {
+
+        val testResult = specRunner.runSingleTestCase(resources = spec.resources, testcase = spec.testCase)
+
+        assertThat(testResult.success)
+                .describedAs(testResult.message)
+                .isTrue()
+    }
+
+    @ParameterizedTest
+    @BpmnSpecSource(specResource = "exclusive-gateway-spec.yaml")
+    fun `with parameterized test`(spec: BpmnSpecTestCase) {
 
         val testResult = specRunner.runSingleTestCase(resources = spec.resources, testcase = spec.testCase)
 
