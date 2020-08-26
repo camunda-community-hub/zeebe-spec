@@ -7,7 +7,7 @@ A tool to write tests for BPMN workflows.
 **Features** :sparkles:
 
 * business-friendly: the test spec is written in a text format, no coding is required
-* vendor independent: the tests can run against any BPMN engine, available integrations
+* vendor independent: the tests can run on any BPMN engine, available integrations
   * [Zeebe](https://github.com/zeebe-io/zeebe)
 
 ## Usage
@@ -136,7 +136,84 @@ Await until an element of the workflow instance is in the given state.
 
 ### Verifications
 
-...
+Verifications check the result of the test case after all actions are applied. The following verifications are available:
+
+### workflow-instance-state
+
+Check if the workflow instance is in a given state.
+
+* `state`: the state of the workflow instance. Must be one of: `activated | completed | terminated` 
+* `workflow_instance`: (optional) the alias of a workflow instance. The alias is defined in the `create-instance` action. If only one instance is created then the alias is not required.
+```
+      - verification: workflow-instance-state
+        args:
+          state: completed
+```
+
+### element-instance-state
+
+Check if an element of the workflow instance is in a given state.
+
+* `state`: the state of the element. Must be one of: `activated | completed | terminated | taken` 
+* `element_name`: (optional) the name of the element in the workflow
+* `element_id`: (optional) as an alternative to the name, the element can be identified by its id in the workflow
+* `workflow_instance`: (optional) the alias of a workflow instance. The alias is defined in the `create-instance` action. If only one instance is created then the alias is not required.
+```
+      - verification: element-instance-state
+        args:
+          element_name: B
+          state: activated
+```
+
+### workflow-instance-variable
+
+Check if the workflow instance has a variable with the given name and value. If the element name or id is set then it checks only for (local) variables in the scope of the element.
+
+* `name`: the name of the variable
+* `value`: the value of the variable
+* `element_name`: (optional) the name of the element in the workflow that has the variable in its scope
+* `element_id`: (optional) as an alternative to the name, the element can be identified by its id in the workflow
+* `workflow_instance`: (optional) the alias of a workflow instance. The alias is defined in the `create-instance` action. If only one instance is created then the alias is not required.
+```
+      - verification: workflow-instance-variable
+        args:
+          name: x
+          value: '1'
+```
+
+### no-workflow-instance-variable
+
+Check if the workflow instance has no variable with the given name. If the element name or id is set then it checks only for (local) variables in the scope of the element.
+
+* `name`: the name of the variable
+* `element_name`: (optional) the name of the element in the workflow that has the variable in its scope
+* `element_id`: (optional) as an alternative to the name, the element can be identified by its id in the workflow
+* `workflow_instance`: (optional) the alias of a workflow instance. The alias is defined in the `create-instance` action. If only one instance is created then the alias is not required.
+```
+      - verification: no-workflow-instance-variable
+        args:
+          name: y
+          element_name: B
+```
+
+### incident-state
+
+Check if the workflow instance has an incident in the given state. If the element name or id is set then it checks only for incidents in the scope of the element.
+
+* `state`: the state of the incident. Must be one of: `created | resolved` 
+* `errorType`: the type/classifier of the incident
+* `errorMessage`: (optional) the error message of the incident
+* `element_name`: (optional) the name of the element in the workflow that has the incident in its scope
+* `element_id`: (optional) as an alternative to the name, the element can be identified by its id in the workflow
+* `workflow_instance`: (optional) the alias of a workflow instance. The alias is defined in the `create-instance` action. If only one instance is created then the alias is not required.
+```
+      - verification: incident-state
+        args:
+          error_type: EXTRACT_VALUE_ERROR
+          error_message: "failed to evaluate expression 'key': no variable found for name 'key'"
+          state: created
+          element_name: B
+```
 
 ## Install
 
