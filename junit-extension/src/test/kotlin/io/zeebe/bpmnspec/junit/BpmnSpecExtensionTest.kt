@@ -2,8 +2,6 @@ package io.zeebe.bpmnspec.junit
 
 import io.zeebe.bpmnspec.runner.zeebe.ZeebeTestRunner
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.AfterAll
-import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.params.ParameterizedTest
 
 @BpmnSpecRunner
@@ -31,21 +29,6 @@ class BpmnSpecExtensionTest(factory: SpecRunnerFactory) {
         assertThat(testResult.success)
                 .describedAs(testResult.message)
                 .isTrue()
-    }
-
-    companion object {
-
-        @BeforeAll
-        @JvmStatic
-        internal fun beforeAll() {
-            println("beforeAll called")
-        }
-
-        @AfterAll
-        @JvmStatic
-        internal fun afterAll() {
-            println("afterAll called")
-        }
     }
 
 }

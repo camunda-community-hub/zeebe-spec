@@ -29,6 +29,8 @@ class ZeebeEnvironment {
     lateinit var zeebeClient: ZeebeClient
     lateinit var zeeqsClient: ZeeqsClient
 
+    var isRunning = false
+
     fun setup() {
         val network = Network.newNetwork()
         closingSteps.add(network)
@@ -98,6 +100,8 @@ class ZeebeEnvironment {
         val zeeqsContainerPort = zeeqsContainer.getMappedPort(zeeqsGraphqlPort)
 
         zeeqsClient = ZeeqsClient(zeeqsEndpoint = "$zeeqsContainerHost:$zeeqsContainerPort/graphql")
+
+        isRunning = true
     }
 
     fun cleanUp() {
@@ -105,6 +109,8 @@ class ZeebeEnvironment {
         closingSteps.toList().reversed().forEach(AutoCloseable::close)
 
         logger.debug("Closed resources")
+
+        isRunning = false
     }
 
     class ZeeqsContainer(imageName: String, version: String) : GenericContainer<ZeeqsContainer>("$imageName:$version")

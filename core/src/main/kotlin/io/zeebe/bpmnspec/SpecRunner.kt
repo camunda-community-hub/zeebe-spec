@@ -48,13 +48,10 @@ class SpecRunner(
 
     fun runSingleTestCase(resources: List<String>, testcase: TestCase): TestResult {
         logger.debug("Running a single test")
-        testRunner.beforeAll()
 
         val testResult = runTestCase(
                 resources = resources,
                 testcase = testcase)
-
-        testRunner.afterAll()
 
         return testResult
     }

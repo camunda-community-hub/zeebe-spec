@@ -26,7 +26,7 @@ class ZeebeTestRunner(
     }
 
     override fun beforeEach() {
-        if (!reuseEnvironment) {
+        if (!reuseEnvironment || !environment.isRunning) {
             environment.setup()
         }
         val testContext = ZeebeTestContext(zeebeClient = environment.zeebeClient)
