@@ -10,19 +10,8 @@ class BpmnSpecExtensionTest(factory: SpecRunnerFactory) {
     private val specRunner = factory.create(testRunner = ZeebeTestRunner())
 
     @ParameterizedTest
-    @BpmnSpecSource(specResource = "exclusive-gateway-spec.yaml")
-    fun `exclusive gateway`(spec: BpmnSpecTestCase) {
-
-        val testResult = specRunner.runSingleTestCase(resources = spec.resources, testcase = spec.testCase)
-
-        assertThat(testResult.success)
-                .describedAs(testResult.message)
-                .isTrue()
-    }
-
-    @ParameterizedTest
-    @BpmnSpecSource(specResource = "boundary-event-spec.yaml")
-    fun `boundary event`(spec: BpmnSpecTestCase) {
+    @BpmnSpecSource(specResources = ["exclusive-gateway-spec.yaml", "boundary-event-spec.yaml"])
+    fun `should pass the BPMN spec`(spec: BpmnSpecTestCase) {
 
         val testResult = specRunner.runSingleTestCase(resources = spec.resources, testcase = spec.testCase)
 

@@ -11,7 +11,7 @@ import org.junit.jupiter.params.ParameterizedTest
 class BpmnSpecExtensionReuseEnvironmentTest {
 
     @ParameterizedTest
-    @BpmnSpecSource(specResource = "spec-with-wf-alias.yaml")
+    @BpmnSpecSource(specResources = ["spec-with-wf-alias.yaml"])
     fun `exclusive gateway`(spec: BpmnSpecTestCase) {
 
         val testResult = specRunner.runSingleTestCase(resources = spec.resources, testcase = spec.testCase)

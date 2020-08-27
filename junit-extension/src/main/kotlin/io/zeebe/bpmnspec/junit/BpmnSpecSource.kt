@@ -6,5 +6,5 @@ import org.junit.jupiter.params.provider.ArgumentsSource
 @Retention(AnnotationRetention.RUNTIME)
 @ArgumentsSource(BpmnSpecTestCaseArgumentsProvider::class)
 annotation class BpmnSpecSource(
-        val specResource: String
+        val specResources: Array<String>
 )

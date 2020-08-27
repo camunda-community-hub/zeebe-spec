@@ -12,29 +12,38 @@ class BpmnSpecTestCaseArgumentsProvider : ArgumentsProvider, AnnotationConsumer<
 
     private val specDeserializer = SpecDeserializer()
 
-    private lateinit var specResource: String
+    private val specResources = mutableListOf<String>()
 
     override fun accept(specSource: BpmnSpecSource?) {
-        specResource = specSource?.specResource
+        specSource?.specResources?.forEach { specResources.add(it) }
                 ?: throw RuntimeException("annotation @BpmnSpecSource no found")
     }
 
     override fun provideArguments(extensionContext: ExtensionContext?): Stream<out Arguments> {
 
-        val resource = extensionContext
-                ?.testClass
-                ?.map { it.classLoader.getResourceAsStream(specResource) }
-                ?.orElseThrow { RuntimeException("no spec resource found with name '$specResource' in classpath") }
-                ?: throw RuntimeException("extension context not found")
+        if (specResources.isEmpty()) {
+            throw RuntimeException("no spec resources defined")
+        }
 
-        val spec = specDeserializer.readSpec(resource)
-
-        return spec.testCases.map {
-            BpmnSpecTestCase(
-                    resources = spec.resources,
-                    testCase = it
-            )
-        }.map { Arguments.of(it) }.stream()
+        return specResources
+                .map { specResource ->
+                    extensionContext
+                            ?.testClass
+                            ?.map { it.classLoader.getResourceAsStream(specResource) }
+                            ?.orElseThrow { RuntimeException("no spec resource found with name '$specResource' in classpath") }
+                            ?: throw RuntimeException("extension context not found")
+                }
+                .map { resource -> specDeserializer.readSpec(resource) }
+                .flatMap { spec ->
+                    spec.testCases.map {
+                        BpmnSpecTestCase(
+                                resources = spec.resources,
+                                testCase = it
+                        )
+                    }
+                }
+                .map { Arguments.of(it) }
+                .stream()
     }
 
 }
