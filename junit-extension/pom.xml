@@ -20,12 +20,6 @@
     </dependency>
 
     <dependency>
-      <groupId>io.zeebe.bpmn-spec</groupId>
-      <artifactId>zeebe-runner</artifactId>
-      <scope>test</scope>
-    </dependency>
-
-    <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter-api</artifactId>
     </dependency>
@@ -38,6 +32,12 @@
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter-engine</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>io.zeebe.bpmn-spec</groupId>
+      <artifactId>zeebe-test-runner</artifactId>
+      <scope>test</scope>
     </dependency>
 
     <dependency>

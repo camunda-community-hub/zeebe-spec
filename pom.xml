@@ -22,7 +22,7 @@
 
   <modules>
     <module>core</module>
-    <module>zeebe-runner</module>
+    <module>zeebe-test-runner</module>
     <module>junit-extension</module>
   </modules>
 
@@ -63,7 +63,7 @@
 
       <dependency>
         <groupId>io.zeebe.bpmn-spec</groupId>
-        <artifactId>zeebe-runner</artifactId>
+        <artifactId>zeebe-test-runner</artifactId>
         <version>${project.version}</version>
       </dependency>
 
