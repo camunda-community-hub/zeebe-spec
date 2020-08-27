@@ -112,7 +112,7 @@ Publish a new message event.
 
 Cancel/terminate a workflow instance.
 
-* `workflow_instance`: the alias of a workflow instance that is canceled. The alias is defined in the `create-instance` action.
+* `workflow_instance`: (optional) the alias of a workflow instance that is canceled. The alias is defined in the `create-instance` action. If only one instance is created then the alias is not required.
 ```
       - action: cancel-instance
         args:
