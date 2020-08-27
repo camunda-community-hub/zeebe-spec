@@ -6,7 +6,5 @@ import org.junit.jupiter.api.extension.ExtendWith
 @Retention(AnnotationRetention.RUNTIME)
 @ExtendWith(SpecRunnerFactoryProvider::class)
 annotation class BpmnSpecRunner(
-        val resourceDirectory: String = "",
-        val verificationTimeout: String = "PT10S",
-        val verificationRetryInterval: String = "PT0.1S"
+        val resourceDirectory: String = ""
 )

@@ -8,23 +8,24 @@ import org.junit.jupiter.params.support.AnnotationConsumer
 import java.util.stream.Stream
 
 
-class BpmnSpecArgumentsProvider : ArgumentsProvider, AnnotationConsumer<BpmnSpecSource> {
+class BpmnSpecTestCaseArgumentsProvider : ArgumentsProvider, AnnotationConsumer<BpmnSpecSource> {
+
+    private val specDeserializer = SpecDeserializer()
 
     private lateinit var specResource: String
 
     override fun accept(specSource: BpmnSpecSource?) {
         specResource = specSource?.specResource
-                ?: throw RuntimeException("The annotation '@BpmnSpecSource' is missing!")
+                ?: throw RuntimeException("annotation @BpmnSpecSource no found")
     }
 
-    override fun provideArguments(context: ExtensionContext?): Stream<out Arguments> {
-        context ?: throw RuntimeException("The ExtensionContext is missing!")
+    override fun provideArguments(extensionContext: ExtensionContext?): Stream<out Arguments> {
 
-        val specDeserializer = SpecDeserializer()
-
-        val resource = context.testClass.map { it.classLoader.getResourceAsStream(specResource) }
-                ?.orElseThrow()
-                ?: throw RuntimeException("Spec resource not found.")
+        val resource = extensionContext
+                ?.testClass
+                ?.map { it.classLoader.getResourceAsStream(specResource) }
+                ?.orElseThrow { RuntimeException("no spec resource found with name '$specResource' in classpath") }
+                ?: throw RuntimeException("extension context not found")
 
         val spec = specDeserializer.readSpec(resource)
 
