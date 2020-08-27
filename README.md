@@ -37,6 +37,8 @@ testCases:
           state: activated
 ``` 
 
+_More examples can be found here: https://github.com/saig0/bpmn-tck_
+
 ### The Spec
 
 A spec is written in a YAML text format. It contains the following elements:
@@ -217,8 +219,74 @@ Check if the workflow instance has an incident in the given state. If the elemen
 
 ## Install
 
-...
+The tests can be run by calling the [SpecRunner](/core/src/main/kotlin/io/zeebe/bpmnspec/SpecRunner.kt) directly in code, or by using the JUnit integration. 
 
 ### JUnit Integration
 
-...
+This repository contains an integration for JUnit 5 using the extension API.  
+
+1) Add the Maven dependencies:
+
+```
+<dependency>
+  <groupId>io.zeebe.bpmn-spec</groupId>
+  <artifactId>junit-extension</artifactId>
+  <version>${bpmn-spec.version}</version>
+  <scope>test</scope>
+</dependency>
+
+<!-- running the spec with Zeebe -->
+<dependency>
+  <groupId>io.zeebe.bpmn-spec</groupId>
+  <artifactId>zeebe-test-runner</artifactId>
+  <version>${bpmn-spec.version}</version>
+  <scope>test</scope>
+</dependency>
+```    
+
+2) Put the spec and BPMN files in the resource folder (e.g. `/src/test/resources/`)
+
+3) Write a JUnit test class like the following (here in Kotlin):
+
+```
+package io.zeebe.bpmn.tck
+
+import io.zeebe.bpmnspec.junit.BpmnSpecRunner
+import io.zeebe.bpmnspec.junit.BpmnSpecSource
+import io.zeebe.bpmnspec.junit.BpmnSpecTestCase
+import io.zeebe.bpmnspec.junit.SpecRunnerFactory
+import io.zeebe.bpmnspec.runner.zeebe.ZeebeTestRunner
+import org.assertj.core.api.Assertions
+import org.junit.jupiter.params.ParameterizedTest
+
+@BpmnSpecRunner
+class BpmnTest(factory: SpecRunnerFactory) {
+
+    private val specRunner = factory.create(testRunner = ZeebeTestRunner())
+
+    @ParameterizedTest
+    @BpmnSpecSource(specResources = ["exclusive-gateway-spec.yaml"])
+    fun `exclusive gateway`(spec: BpmnSpecTestCase) {
+
+        val testResult = specRunner.runSingleTestCase(resources = spec.resources, testcase = spec.testCase)
+
+        Assertions.assertThat(testResult.success)
+                .describedAs("%s%nDetails: %s", testResult.message, testResult.output)
+                .isTrue()
+    }
+
+}
+```
+
+* annotate the class with `@BpmnSpecRunner` 
+* create an instance of the `SpecRunner` with the test runner that you want to use
+  * the `SpecRunnerFactory` can be injected in the constructor, a `beforeEach`/`beforeAll` method, or the test method
+* annotate the test method with `@ParameterizedTest` and `@BpmnSpecSource`
+  * the parameter `specResources` lists the spec files to run 
+  * add a method parameter of the type `BpmnSpecTestCase` that holds the resources and the parsed spec
+* run the test cases in the test method using `SpecRunner.runSingleTestCase()` and pass the parameter `BpmnSpecTestCase` in it
+* verify the test results with the return value
+
+4) Run the JUnit test class
+
+![Junit test results](docs/bpmn-spec-junit.png)
