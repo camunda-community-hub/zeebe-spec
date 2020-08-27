@@ -36,7 +36,7 @@ class SpecDeserializer {
 
     private fun transformAction(action: Action): io.zeebe.bpmnspec.api.Action {
         val name = action.action.toLowerCase()
-        val args = action.args
+        val args = action.args ?: emptyMap()
 
         return when (name) {
             "create-instance" -> CreateInstanceAction(
