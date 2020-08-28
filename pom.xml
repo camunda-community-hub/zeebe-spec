@@ -4,7 +4,7 @@
 
   <groupId>io.zeebe.bpmn-spec</groupId>
   <artifactId>root</artifactId>
-  <version>1.0.0-alpha1</version>
+  <version>1.0.0-SNAPSHOT</version>
   <name>BPMN Spec - Root</name>
   <description>A tool to write tests for BPMN workflows</description>
 
@@ -331,7 +331,7 @@
     <url>https://github.com/zeebe-io/bpmn-spec</url>
     <connection>scm:git:git@github.com:zeebe-io/bpmn-spec.git</connection>
     <developerConnection>scm:git:git@github.com:zeebe-io/bpmn-spec.git</developerConnection>
-    <tag>1.0.0-alpha1</tag>
+    <tag>HEAD</tag>
   </scm>
 
 </project>
