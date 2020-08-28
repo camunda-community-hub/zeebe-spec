@@ -329,4 +329,11 @@
     </repository>
   </repositories>
 
+  <scm>
+    <url>https://github.com/zeebe-io/bpmn-spec</url>
+    <connection>scm:git:git@github.com:zeebe-io/bpmn-spec.git</connection>
+    <developerConnection>scm:git:git@github.com:zeebe-io/bpmn-spec.git</developerConnection>
+    <tag>HEAD</tag>
+  </scm>
+
 </project>
