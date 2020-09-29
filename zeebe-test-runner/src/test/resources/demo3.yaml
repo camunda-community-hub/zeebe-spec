@@ -47,5 +47,4 @@ testCases:
       - verification: no-workflow-instance-variable
         args:
           name: x
-          value: '1'
           element_name: message-1
