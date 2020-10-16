@@ -7,8 +7,13 @@ A tool to write tests for BPMN workflows.
 **Features** :sparkles:
 
 * business-friendly: the test spec is written in a text format, no coding is required
-* vendor independent: the tests can run on any BPMN engine, available integrations:
-  * [Zeebe](https://github.com/zeebe-io/zeebe)
+* vendor independent: the tests can run on any BPMN engine
+
+Available integrations:
+
+| Workflow Engine | Test Runner Dependency |
+| --- | ---|
+| [Zeebe](https://github.com/zeebe-io/zeebe)  | `<artifactId>zeebe-test-runner</artifactId>` | 
 
 ## Usage
 
@@ -221,7 +226,73 @@ Check if the workflow instance has an incident in the given state. If the elemen
 
 The tests can be run by calling the [SpecRunner](/core/src/main/kotlin/io/zeebe/bpmnspec/SpecRunner.kt) directly in code, or by using the JUnit integration. 
 
-### JUnit Integration
+### JUnit Integration (generic)
+
+1) Add the Maven dependencies:
+
+```
+<dependency>
+  <groupId>io.zeebe.bpmn-spec</groupId>
+  <artifactId>junit-extension</artifactId>
+  <version>${bpmn-spec.version}</version>
+  <scope>test</scope>
+</dependency>
+
+<!-- running the spec with [engine] -->
+<dependency>
+ // test runner implementation for [engine]
+</dependency>
+```    
+
+2) Put the spec and BPMN files in the resource folder (e.g. `/src/test/resources/`)
+
+3) Write a JUnit test class like the following (here in Kotlin):
+
+```
+package io.zeebe.bpmn.tck
+
+import io.zeebe.bpmnspec.junit.BpmnSpecRunner
+import io.zeebe.bpmnspec.junit.BpmnSpecSource
+import io.zeebe.bpmnspec.junit.BpmnSpecTestCase
+import io.zeebe.bpmnspec.junit.SpecRunnerFactory
+import io.zeebe.bpmnspec.runner.zeebe.ZeebeTestRunner
+import org.assertj.core.api.Assertions
+import org.junit.jupiter.params.ParameterizedTest
+
+@BpmnSpecRunner
+class BpmnTest(factory: SpecRunnerFactory) {
+
+    private val specRunner = factory.create(testRunner = MyEngineTestRunner())
+
+    @ParameterizedTest
+    @BpmnSpecSource(specResources = ["exclusive-gateway-spec.yaml"])
+    fun `exclusive gateway`(spec: BpmnSpecTestCase) {
+
+        val testResult = specRunner.runSingleTestCase(resources = spec.resources, testcase = spec.testCase)
+
+        Assertions.assertThat(testResult.success)
+                .describedAs("%s%nDetails: %s", testResult.message, testResult.output)
+                .isTrue()
+    }
+
+}
+```
+
+* annotate the class with `@BpmnSpecRunner` 
+* create an instance of the `SpecRunner` with the test runner that corresponds to the engine you want to test
+  * the `SpecRunnerFactory` can be injected in the constructor, a `beforeEach`/`beforeAll` method, or the test method
+* annotate the test method with `@ParameterizedTest` and `@BpmnSpecSource`
+  * the parameter `specResources` lists the spec files to run 
+  * add a method parameter of the type `BpmnSpecTestCase` that holds the resources and the parsed spec
+* run the test cases in the test method using `SpecRunner.runSingleTestCase()` and pass the parameter `BpmnSpecTestCase` in it
+* verify the test results with the return value
+
+4) Run the JUnit test class
+
+![Junit test results](docs/bpmn-spec-junit.png)
+
+
+### JUnit Integration (ZeebeTestRunner)
 
 This repository contains an integration for JUnit 5 using the extension API.  
 
@@ -244,9 +315,31 @@ This repository contains an integration for JUnit 5 using the extension API.
 </dependency>
 ```    
 
-2) Put the spec and BPMN files in the resource folder (e.g. `/src/test/resources/`)
+2) Optionally, specify the image of Zeebe (with enabled Hazelcast exporter) to use for the tests. (if system properties are not set, then defaults will be used)
+```
+<project>
+  [...]
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <systemPropertyVariables>
+            <zeebeImage>camunda/zeebe-with-hazelcast-exporter</zeebeImage>
+            <zeebeImageVersion>0.24.2-0.10.0-alpha1</zeebeImageVersion>
+          </systemPropertyVariables>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+  [...]
+</project>
+```
 
-3) Write a JUnit test class like the following (here in Kotlin):
+3) Put the spec and BPMN files in the resource folder (e.g. `/src/test/resources/`)
+
+4) Write a JUnit test class like the following (here in Kotlin):
 
 ```
 package io.zeebe.bpmn.tck
@@ -279,7 +372,7 @@ class BpmnTest(factory: SpecRunnerFactory) {
 ```
 
 * annotate the class with `@BpmnSpecRunner` 
-* create an instance of the `SpecRunner` with the test runner that you want to use
+* create an instance of the `SpecRunner` with the `ZeebeTestRunner`
   * the `SpecRunnerFactory` can be injected in the constructor, a `beforeEach`/`beforeAll` method, or the test method
 * annotate the test method with `@ParameterizedTest` and `@BpmnSpecSource`
   * the parameter `specResources` lists the spec files to run 

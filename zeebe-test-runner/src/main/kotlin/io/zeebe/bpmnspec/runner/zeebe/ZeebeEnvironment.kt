@@ -10,12 +10,11 @@ import org.testcontainers.containers.GenericContainer
 import org.testcontainers.containers.Network
 import org.testcontainers.containers.wait.strategy.Wait
 
-class ZeebeEnvironment {
+class ZeebeEnvironment (
+        val zeebeImage : String = System.getProperty("zeebeImage", "camunda/zeebe-with-hazelcast-exporter"),
+        val zeebeImageVersion : String = System.getProperty("zeebeImageVersion", "0.24.2-0.10.0-alpha1")) {
 
     private val logger = LoggerFactory.getLogger(ZeebeTestRunner::class.java)
-
-    val zeebeImage = "camunda/zeebe-with-hazelcast-exporter"
-    val zeebeImageVersion: String = "0.24.2-0.10.0-alpha1"
 
     val zeeqsImage = "camunda/zeeqs"
     val zeeqsImageVersion: String = "1.0.0-alpha2"
