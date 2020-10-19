@@ -12,7 +12,7 @@ import org.testcontainers.containers.wait.strategy.Wait
 
 class ZeebeEnvironment (
         val zeebeImage : String = System.getProperty("zeebeImage", "camunda/zeebe-with-hazelcast-exporter"),
-        val zeebeImageVersion : String = System.getProperty("zeebeImageVersion", "0.24.2-0.10.0-alpha1")) {
+        val zeebeImageVersion : String = System.getProperty("zeebeImageVersion", "0.24.4-0.10.0")) {
 
     private val logger = LoggerFactory.getLogger(ZeebeTestRunner::class.java)
 
@@ -35,7 +35,6 @@ class ZeebeEnvironment (
         closingSteps.add(network)
 
         val zeebeContainer = ZeebeBrokerContainer(zeebeImage, zeebeImageVersion)
-                .withClasspathResourceMapping("application.yaml", "/usr/local/zeebe/config/application.yaml", BindMode.READ_ONLY)
                 .withExposedPorts(hazelcastPort)
                 .withNetwork(network)
                 .withNetworkAliases(zeebeHost)
