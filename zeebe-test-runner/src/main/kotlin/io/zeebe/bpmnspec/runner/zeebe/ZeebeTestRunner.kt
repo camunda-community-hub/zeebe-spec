@@ -9,6 +9,7 @@ import java.time.Duration
 import java.util.function.Consumer
 
 class ZeebeTestRunner(
+        private val environment: ZeebeEnvironment = ZeebeEnvironment(),
         private val reuseEnvironment: Boolean = false,
         private val beforeEachCallback: (ZeebeTestContext) -> Unit = {},
         private val afterEachCallback: (ZeebeTestContext) -> Unit = {}
@@ -16,7 +17,6 @@ class ZeebeTestRunner(
 
     private val logger = LoggerFactory.getLogger(ZeebeTestRunner::class.java)
 
-    private val environment = ZeebeEnvironment()
     private val jobWorkers = mutableListOf<JobWorker>()
 
     override fun beforeAll() {
