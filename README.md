@@ -294,18 +294,11 @@ class BpmnTest(factory: SpecRunnerFactory) {
 
 ### JUnit Integration (ZeebeTestRunner)
 
-This repository contains an integration for JUnit 5 using the extension API.  
+This repository contains an integration for JUnit 5 using the extension API. To run the BPMN tests against Zeebe:  
 
-1) Add the Maven dependencies:
+1) Add the Maven dependency for the Zeebe test runner:
 
 ```
-<dependency>
-  <groupId>io.zeebe.bpmn-spec</groupId>
-  <artifactId>junit-extension</artifactId>
-  <version>${bpmn-spec.version}</version>
-  <scope>test</scope>
-</dependency>
-
 <!-- running the spec with Zeebe -->
 <dependency>
   <groupId>io.zeebe.bpmn-spec</groupId>
@@ -336,50 +329,10 @@ This repository contains an integration for JUnit 5 using the extension API.
   [...]
 </project>
 ```
-
-3) Put the spec and BPMN files in the resource folder (e.g. `/src/test/resources/`)
-
-4) Write a JUnit test class like the following (here in Kotlin):
+3) Write a JUnit test class like the one mentioned above and use this line to select the `ZeebeTestRunner`:
 
 ```
-package io.zeebe.bpmn.tck
-
-import io.zeebe.bpmnspec.junit.BpmnSpecRunner
-import io.zeebe.bpmnspec.junit.BpmnSpecSource
-import io.zeebe.bpmnspec.junit.BpmnSpecTestCase
-import io.zeebe.bpmnspec.junit.SpecRunnerFactory
-import io.zeebe.bpmnspec.runner.zeebe.ZeebeTestRunner
-import org.assertj.core.api.Assertions
-import org.junit.jupiter.params.ParameterizedTest
-
-@BpmnSpecRunner
-class BpmnTest(factory: SpecRunnerFactory) {
-
-    private val specRunner = factory.create(testRunner = ZeebeTestRunner())
-
-    @ParameterizedTest
-    @BpmnSpecSource(specResources = ["exclusive-gateway-spec.yaml"])
-    fun `exclusive gateway`(spec: BpmnSpecTestCase) {
-
-        val testResult = specRunner.runSingleTestCase(resources = spec.resources, testcase = spec.testCase)
-
-        Assertions.assertThat(testResult.success)
-                .describedAs("%s%nDetails: %s", testResult.message, testResult.output)
-                .isTrue()
-    }
-
-}
+private val specRunner = factory.create(testRunner = ZeebeTestRunner())
 ```
 
-* annotate the class with `@BpmnSpecRunner` 
-* create an instance of the `SpecRunner` with the `ZeebeTestRunner`
-  * the `SpecRunnerFactory` can be injected in the constructor, a `beforeEach`/`beforeAll` method, or the test method
-* annotate the test method with `@ParameterizedTest` and `@BpmnSpecSource`
-  * the parameter `specResources` lists the spec files to run 
-  * add a method parameter of the type `BpmnSpecTestCase` that holds the resources and the parsed spec
-* run the test cases in the test method using `SpecRunner.runSingleTestCase()` and pass the parameter `BpmnSpecTestCase` in it
-* verify the test results with the return value
-
-4) Run the JUnit test class
-
-![Junit test results](docs/bpmn-spec-junit.png)
+4) Follow the other steps as mentioned [above](#junit-integration-generic)
