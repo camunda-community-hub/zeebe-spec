@@ -35,7 +35,7 @@ class ZeebeEnvironment (
         val network = Network.newNetwork()
         closingSteps.add(network)
 
-        val zeebeContainer = ZeebeContainer("$zeeqsImage:$zeebeImageVersion")
+        val zeebeContainer = ZeebeContainer("$zeebeImage:$zeebeImageVersion")
                 .withExposedPorts(hazelcastPort)
                 .withNetwork(network)
                 .withNetworkAliases(zeebeHost)
