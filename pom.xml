@@ -28,7 +28,7 @@
     <kotlin.version>1.4.10</kotlin.version>
     <zeebe.version>0.25.1</zeebe.version>
 
-    <spring.boot.version>2.3.5.RELEASE</spring.boot.version>
+    <spring.boot.version>2.4.1</spring.boot.version>
     <junit.version>5.7.0</junit.version>
 
     <hazelcast.exporter.version>0.9.0</hazelcast.exporter.version>
@@ -36,7 +36,7 @@
     <version.hazelcast>4.0.1</version.hazelcast>
 
     <zeebe-test-container.version>1.0.1</zeebe-test-container.version>
-    <test-container.version>1.15.0</test-container.version>
+    <test-container.version>1.15.1</test-container.version>
 
     <!-- release parent settings -->
     <version.java>11</version.java>
