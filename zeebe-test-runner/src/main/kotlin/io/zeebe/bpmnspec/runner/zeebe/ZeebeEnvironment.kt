@@ -3,6 +3,7 @@ package io.zeebe.bpmnspec.runner.zeebe
 import io.zeebe.bpmnspec.runner.zeebe.zeeqs.ZeeqsClient
 import io.zeebe.client.ZeebeClient
 import io.zeebe.containers.ZeebeBrokerContainer
+import io.zeebe.containers.ZeebeContainer
 import io.zeebe.containers.ZeebePort
 import org.slf4j.LoggerFactory
 import org.testcontainers.containers.BindMode
@@ -34,7 +35,7 @@ class ZeebeEnvironment (
         val network = Network.newNetwork()
         closingSteps.add(network)
 
-        val zeebeContainer = ZeebeBrokerContainer(zeebeImage, zeebeImageVersion)
+        val zeebeContainer = ZeebeContainer("$zeeqsImage:$zeebeImageVersion")
                 .withExposedPorts(hazelcastPort)
                 .withNetwork(network)
                 .withNetworkAliases(zeebeHost)
@@ -52,7 +53,7 @@ class ZeebeEnvironment (
         logger.debug("Started the Zeebe container")
         closingSteps.add(zeebeContainer)
 
-        val zeebeGatewayPort = zeebeContainer.getExternalAddress(ZeebePort.GATEWAY)
+        val zeebeGatewayPort = zeebeContainer.externalGatewayAddress
 
         zeebeClient = ZeebeClient
                 .newClientBuilder()
