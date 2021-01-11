@@ -25,6 +25,10 @@ class SpecRunner(
         logger.trace("Reading the spec")
         val spec = specDeserializer.readSpec(input)
 
+        return runSpec(spec)
+    }
+
+    fun runSpec(spec : TestSpec) : TestSpecResult {
         logger.debug("Running {} tests", spec.testCases.size)
         testRunner.beforeAll()
 
