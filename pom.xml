@@ -328,9 +328,9 @@
   </repositories>
 
   <scm>
-    <url>https://github.com/zeebe-io/bpmn-spec</url>
-    <connection>scm:git:git@github.com:zeebe-io/bpmn-spec.git</connection>
-    <developerConnection>scm:git:git@github.com:zeebe-io/bpmn-spec.git</developerConnection>
+    <url>https://github.com/camunda-community-hub/bpmn-spec</url>
+    <connection>scm:git:git@github.com:camunda-community-hub/bpmn-spec.git</connection>
+    <developerConnection>scm:git:git@github.com:camunda-community-hub/bpmn-spec.git</developerConnection>
     <tag>HEAD</tag>
   </scm>
 

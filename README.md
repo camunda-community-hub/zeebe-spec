@@ -18,7 +18,7 @@ Available integrations:
 
 | Workflow Engine | Test Runner Dependency |
 | --- | ---|
-| [Zeebe](https://github.com/zeebe-io/zeebe)  | `<artifactId>zeebe-test-runner</artifactId>` | 
+| [Zeebe](https://github.com/camunda/zeebe)  | `<artifactId>zeebe-test-runner</artifactId>` | 
 
 ## Usage
 
