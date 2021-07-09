@@ -16,44 +16,44 @@ class ZeeqsClient(val zeeqsEndpoint: String = "http://localhost:9000/graphql") {
     private val httpClient = HttpClient.newHttpClient()
     private val objectMapper = ObjectMapper().registerModule(KotlinModule())
 
-    fun getWorkflowInstanceKeys(): List<Long> {
+    fun getProcessInstanceKeys(): List<Long> {
 
-        val responseBody = sendRequest("{ workflowInstances { nodes  { key, state } } }")
-        val response = objectMapper.readValue<WorkflowInstancesResponse>(responseBody)
+        val responseBody = sendRequest("{ processInstances { nodes  { key, state } } }")
+        val response = objectMapper.readValue<ProcessInstancesResponse>(responseBody)
 
-        return response.data.workflowInstances.nodes.map { it.key.toLong()  }
+        return response.data.processInstances.nodes.map { it.key.toLong()  }
     }
 
-    fun getWorkflowInstanceState(workflowInstanceKey: Long): String? {
+    fun getProcessInstanceState(processInstanceKey: Long): String? {
 
-        val responseBody = sendRequest("{ workflowInstance(key: $workflowInstanceKey) { key, state } }")
-        val response = objectMapper.readValue<WorkflowInstanceResponse>(responseBody)
+        val responseBody = sendRequest("{ processInstance(key: $processInstanceKey) { key, state } }")
+        val response = objectMapper.readValue<ProcessInstanceResponse>(responseBody)
 
-        return response.data.workflowInstance?.state
+        return response.data.processInstance?.state
     }
 
-    fun getElementInstances(workflowInstanceKey: Long): List<ElementInstanceDto> {
+    fun getElementInstances(processInstanceKey: Long): List<ElementInstanceDto> {
 
-        val responseBody = sendRequest("{ workflowInstance(key: $workflowInstanceKey) { elementInstances { elementId, elementName, state } } }")
+        val responseBody = sendRequest("{ processInstance(key: $processInstanceKey) { elementInstances { elementId, elementName, state } } }")
         val response = objectMapper.readValue<ElementInstancesResponse>(responseBody)
 
-        return response.data.workflowInstance?.elementInstances ?: emptyList()
+        return response.data.processInstance?.elementInstances ?: emptyList()
     }
 
-    fun getWorkflowInstanceVariables(workflowInstanceKey: Long): List<VariableDto> {
+    fun getWorkflowInstanceVariables(processInstanceKey: Long): List<VariableDto> {
 
-        val responseBody = sendRequest("{ workflowInstance(key: $workflowInstanceKey) { variables { name, value, scope { elementId, elementName } } } }")
+        val responseBody = sendRequest("{ processInstance(key: $processInstanceKey) { variables { name, value, scope { elementId, elementName } } } }")
         val response = objectMapper.readValue<VariablesResponse>(responseBody)
 
-        return response.data.workflowInstance?.variables ?: emptyList()
+        return response.data.processInstance?.variables ?: emptyList()
     }
 
-    fun getIncidents(workflowInstanceKey: Long): List<IncidentDto> {
+    fun getIncidents(processInstanceKey: Long): List<IncidentDto> {
 
-        val responseBody = sendRequest("{ workflowInstance(key: $workflowInstanceKey) { incidents { errorType, errorMessage, state, elementInstance { elementId, elementName } } } }")
+        val responseBody = sendRequest("{ processInstance(key: $processInstanceKey) { incidents { errorType, errorMessage, state, elementInstance { elementId, elementName } } } }")
         val response = objectMapper.readValue<IncidentsResponse>(responseBody)
 
-        return response.data.workflowInstance?.incidents ?: emptyList()
+        return response.data.processInstance?.incidents ?: emptyList()
     }
 
     private fun sendRequest(query: String): String {
@@ -82,27 +82,27 @@ class ZeeqsClient(val zeeqsEndpoint: String = "http://localhost:9000/graphql") {
         return responseBody
     }
 
-    data class WorkflowInstanceResponse(val data: WorkflowInstanceDataDto)
-    data class WorkflowInstanceDataDto(val workflowInstance: WorkflowInstanceDto?)
-    data class WorkflowInstanceDto(val key: String, val state: String)
+    data class ProcessInstanceResponse(val data: ProcessInstanceDataDto)
+    data class ProcessInstanceDataDto(val processInstance: ProcessInstanceDto?)
+    data class ProcessInstanceDto(val key: String, val state: String)
 
-    data class WorkflowInstancesResponse(val data: WorkflowInstancesDataDto)
-    data class WorkflowInstancesDataDto(val workflowInstances: WorkflowInstancesDto)
-    data class WorkflowInstancesDto(val nodes: List<WorkflowInstanceDto>)
+    data class ProcessInstancesResponse(val data: ProcessInstancesDataDto)
+    data class ProcessInstancesDataDto(val processInstances: ProcessInstancesDto)
+    data class ProcessInstancesDto(val nodes: List<ProcessInstanceDto>)
 
     data class ElementInstancesResponse(val data: ElementInstancesDataDto)
-    data class ElementInstancesDataDto(val workflowInstance: ElementInstancesDto?)
+    data class ElementInstancesDataDto(val processInstance: ElementInstancesDto?)
     data class ElementInstancesDto(val elementInstances: List<ElementInstanceDto>)
     data class ElementInstanceDto(val state: String, val elementId: String, val elementName: String?)
 
     data class VariablesResponse(val data: VariablesDataDto)
-    data class VariablesDataDto(val workflowInstance: VariablesDto?)
+    data class VariablesDataDto(val processInstance: VariablesDto?)
     data class VariablesDto(val variables: List<VariableDto>)
     data class VariableDto(val name: String, val value: String, val scope: VariableScopeDto?)
     data class VariableScopeDto(val elementId: String, val elementName: String?)
 
     data class IncidentsResponse(val data: IncidentsDataDto)
-    data class IncidentsDataDto(val workflowInstance: IncidentsDto?)
+    data class IncidentsDataDto(val processInstance: IncidentsDto?)
     data class IncidentsDto(val incidents: List<IncidentDto>)
     data class IncidentDto(val errorType: String, val errorMessage: String?, val state: String, val elementInstance: IncidentElementInstanceDto?)
     data class IncidentElementInstanceDto(val elementId: String, val elementName: String?)

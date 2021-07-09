@@ -5,11 +5,13 @@ import io.zeebe.bpmnspec.runner.zeebe.ZeebeTestRunner
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.params.ParameterizedTest
 
 @BpmnSpecRunner
 class BpmnSpecExtensionReuseEnvironmentTest {
 
+    @Disabled("blocked by the bug #82")
     @ParameterizedTest
     @BpmnSpecSource(specResources = ["spec-with-wf-alias.yaml"])
     fun `exclusive gateway`(spec: BpmnSpecTestCase) {

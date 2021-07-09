@@ -1,12 +1,11 @@
 package io.zeebe.bpmnspec.runner.zeebe
 
-import io.zeebe.bpmnspec.api.WorkflowInstanceContext
+import io.zeebe.bpmnspec.api.ProcessInstanceContext
 import io.zeebe.bpmnspec.api.runner.*
-import io.zeebe.client.api.worker.JobWorker
+import io.camunda.zeebe.client.api.worker.JobWorker
 import org.slf4j.LoggerFactory
 import java.io.InputStream
 import java.time.Duration
-import java.util.function.Consumer
 
 class ZeebeTestRunner(
         private val environment: ZeebeEnvironment = ZeebeEnvironment(),
@@ -59,7 +58,7 @@ class ZeebeTestRunner(
                 .join()
     }
 
-    override fun createWorkflowInstance(bpmnProcessId: String, variables: String): WorkflowInstanceContext {
+    override fun createWorkflowInstance(bpmnProcessId: String, variables: String): ProcessInstanceContext {
         logger.debug("Creating a workflow instance. [BPMN-process-id: {}, variables: {}]", bpmnProcessId, variables)
 
         val response = environment.zeebeClient.newCreateInstanceCommand()
@@ -68,8 +67,8 @@ class ZeebeTestRunner(
                 .send()
                 .join()
 
-        return ZeebeWorkflowInstanceContext(
-                workflowInstanceKey = response.workflowInstanceKey
+        return ZeebeProcessInstanceContext(
+                processInstanceKey = response.processInstanceKey
         )
     }
 
@@ -122,26 +121,26 @@ class ZeebeTestRunner(
         jobWorkers.add(jobWorker)
     }
 
-    override fun cancelWorkflowInstance(context: WorkflowInstanceContext) {
-        val wfContext = context as ZeebeWorkflowInstanceContext
+    override fun cancelWorkflowInstance(context: ProcessInstanceContext) {
+        val wfContext = context as ZeebeProcessInstanceContext
 
-        logger.debug("Cancelling a workflow instance. [key: {}]", wfContext.workflowInstanceKey)
+        logger.debug("Cancelling a workflow instance. [key: {}]", wfContext.processInstanceKey)
 
-        environment.zeebeClient.newCancelInstanceCommand(wfContext.workflowInstanceKey)
+        environment.zeebeClient.newCancelInstanceCommand(wfContext.processInstanceKey)
                 .send()
                 .join()
     }
 
-    override fun getWorkflowInstanceContexts(): List<WorkflowInstanceContext> {
+    override fun getWorkflowInstanceContexts(): List<ProcessInstanceContext> {
 
-        return environment.zeeqsClient.getWorkflowInstanceKeys()
-                .map { ZeebeWorkflowInstanceContext(workflowInstanceKey = it) }
+        return environment.zeeqsClient.getProcessInstanceKeys()
+                .map { ZeebeProcessInstanceContext(processInstanceKey = it) }
     }
 
-    override fun getWorkflowInstanceState(context: WorkflowInstanceContext): WorkflowInstanceState {
-        val wfContext = context as ZeebeWorkflowInstanceContext
+    override fun getWorkflowInstanceState(context: ProcessInstanceContext): WorkflowInstanceState {
+        val wfContext = context as ZeebeProcessInstanceContext
 
-        val state = environment.zeeqsClient.getWorkflowInstanceState(wfContext.workflowInstanceKey)
+        val state = environment.zeeqsClient.getProcessInstanceState(wfContext.processInstanceKey)
         return when (state) {
             "COMPLETED" -> WorkflowInstanceState.COMPLETED
             "TERMINATED" -> WorkflowInstanceState.TERMINATED
@@ -150,10 +149,10 @@ class ZeebeTestRunner(
         }
     }
 
-    override fun getElementInstances(context: WorkflowInstanceContext): List<ElementInstance> {
-        val wfContext = context as ZeebeWorkflowInstanceContext
+    override fun getElementInstances(context: ProcessInstanceContext): List<ElementInstance> {
+        val wfContext = context as ZeebeProcessInstanceContext
 
-        return environment.zeeqsClient.getElementInstances(workflowInstanceKey = wfContext.workflowInstanceKey).map {
+        return environment.zeeqsClient.getElementInstances(processInstanceKey = wfContext.processInstanceKey).map {
             ElementInstance(
                     elementId = it.elementId,
                     elementName = it.elementName,
@@ -168,10 +167,10 @@ class ZeebeTestRunner(
         }
     }
 
-    override fun getWorkflowInstanceVariables(context: WorkflowInstanceContext): List<WorkflowInstanceVariable> {
-        val wfContext = context as ZeebeWorkflowInstanceContext
+    override fun getWorkflowInstanceVariables(context: ProcessInstanceContext): List<WorkflowInstanceVariable> {
+        val wfContext = context as ZeebeProcessInstanceContext
 
-        return environment.zeeqsClient.getWorkflowInstanceVariables(workflowInstanceKey = wfContext.workflowInstanceKey)
+        return environment.zeeqsClient.getWorkflowInstanceVariables(processInstanceKey = wfContext.processInstanceKey)
                 .map {
                     WorkflowInstanceVariable(
                             variableName = it.name,
@@ -182,10 +181,10 @@ class ZeebeTestRunner(
                 }
     }
 
-    override fun getIncidents(context: WorkflowInstanceContext): List<Incident> {
-        val wfContext = context as ZeebeWorkflowInstanceContext
+    override fun getIncidents(context: ProcessInstanceContext): List<Incident> {
+        val wfContext = context as ZeebeProcessInstanceContext
 
-        return environment.zeeqsClient.getIncidents(workflowInstanceKey = wfContext.workflowInstanceKey)
+        return environment.zeeqsClient.getIncidents(processInstanceKey = wfContext.processInstanceKey)
                 .map {
                     Incident(
                             errorType = it.errorType,
