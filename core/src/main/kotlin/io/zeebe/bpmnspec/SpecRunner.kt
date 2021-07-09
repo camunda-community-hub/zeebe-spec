@@ -82,7 +82,7 @@ class SpecRunner(
 
     private fun runTestCase(testcase: TestCase): TestResult {
 
-        val contexts = mutableMapOf<String, WorkflowInstanceContext>()
+        val contexts = mutableMapOf<String, ProcessInstanceContext>()
 
         // TODO (saig0): handle case when the context is not found
         val testContext = TestContext(

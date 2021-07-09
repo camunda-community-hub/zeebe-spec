@@ -6,7 +6,7 @@ import io.zeebe.bpmnspec.api.runner.WorkflowInstanceState
 import io.zeebe.bpmnspec.api.runner.WorkflowInstanceVariable
 
 data class TestOutput(
-        val context: WorkflowInstanceContext,
+        val context: ProcessInstanceContext,
         val state: WorkflowInstanceState,
         val elementInstances: List<ElementInstance>,
         val variables: List<WorkflowInstanceVariable>,

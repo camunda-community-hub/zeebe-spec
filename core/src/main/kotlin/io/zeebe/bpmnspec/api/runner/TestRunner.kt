@@ -1,6 +1,6 @@
 package io.zeebe.bpmnspec.api.runner
 
-import io.zeebe.bpmnspec.api.WorkflowInstanceContext
+import io.zeebe.bpmnspec.api.ProcessInstanceContext
 import java.io.InputStream
 
 interface TestRunner {
@@ -15,7 +15,7 @@ interface TestRunner {
 
     fun deployWorkflow(name: String, bpmnXml: InputStream)
 
-    fun createWorkflowInstance(bpmnProcessId: String, variables: String): WorkflowInstanceContext
+    fun createWorkflowInstance(bpmnProcessId: String, variables: String): ProcessInstanceContext
 
     fun completeTask(jobType: String, variables: String)
 
@@ -23,16 +23,16 @@ interface TestRunner {
 
     fun throwError(jobType: String, errorCode: String, errorMessage: String)
 
-    fun cancelWorkflowInstance(context: WorkflowInstanceContext)
+    fun cancelWorkflowInstance(context: ProcessInstanceContext)
 
-    fun getWorkflowInstanceContexts(): List<WorkflowInstanceContext>
+    fun getWorkflowInstanceContexts(): List<ProcessInstanceContext>
 
-    fun getWorkflowInstanceState(context: WorkflowInstanceContext): WorkflowInstanceState
+    fun getWorkflowInstanceState(context: ProcessInstanceContext): WorkflowInstanceState
 
-    fun getElementInstances(context: WorkflowInstanceContext): List<ElementInstance>
+    fun getElementInstances(context: ProcessInstanceContext): List<ElementInstance>
 
-    fun getWorkflowInstanceVariables(context: WorkflowInstanceContext): List<WorkflowInstanceVariable>
+    fun getWorkflowInstanceVariables(context: ProcessInstanceContext): List<WorkflowInstanceVariable>
 
-    fun getIncidents(context: WorkflowInstanceContext): List<Incident>
+    fun getIncidents(context: ProcessInstanceContext): List<Incident>
 
 }

@@ -26,16 +26,16 @@
 
   <properties>
     <kotlin.version>1.5.20</kotlin.version>
-    <zeebe.version>0.26.1</zeebe.version>
+    <zeebe.version>1.0.1</zeebe.version>
 
     <spring.boot.version>2.5.2</spring.boot.version>
     <junit.version>5.7.2</junit.version>
 
-    <hazelcast.exporter.version>0.9.0</hazelcast.exporter.version>
+    <hazelcast.exporter.version>1.0.0</hazelcast.exporter.version>
     <!-- pin Hazelcast version because of spring-boot-dependencies -->
     <version.hazelcast>4.0.1</version.hazelcast>
 
-    <zeebe-test-container.version>1.0.1</zeebe-test-container.version>
+    <zeebe-test-container.version>3.0.0</zeebe-test-container.version>
     <test-container.version>1.15.2</test-container.version>
 
     <!-- release parent settings -->
@@ -67,7 +67,7 @@
       </dependency>
 
       <dependency>
-        <groupId>io.zeebe</groupId>
+        <groupId>io.camunda</groupId>
         <artifactId>zeebe-bom</artifactId>
         <version>${zeebe.version}</version>
         <scope>import</scope>
@@ -99,7 +99,7 @@
       <dependency>
         <groupId>org.testcontainers</groupId>
         <artifactId>testcontainers</artifactId>
-        <version>1.15.2</version>
+        <version>${test-container.version}</version>
       </dependency>
 
       <dependency>

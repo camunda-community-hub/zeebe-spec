@@ -2,7 +2,7 @@ package io.zeebe.bpmnspec.verifications
 
 import io.zeebe.bpmnspec.api.Verification
 import io.zeebe.bpmnspec.api.VerificationResult
-import io.zeebe.bpmnspec.api.WorkflowInstanceContext
+import io.zeebe.bpmnspec.api.ProcessInstanceContext
 import io.zeebe.bpmnspec.api.runner.TestRunner
 
 class WorkflowInstanceVariableVerification(
@@ -13,7 +13,7 @@ class WorkflowInstanceVariableVerification(
         val scopeElementName: String?
 ) : Verification {
 
-    override fun verify(runner: TestRunner, contexts: Map<String, WorkflowInstanceContext>): VerificationResult {
+    override fun verify(runner: TestRunner, contexts: Map<String, ProcessInstanceContext>): VerificationResult {
 
         val context = workflowInstance?.let { contexts[workflowInstance] }
                 ?: contexts.values.first()

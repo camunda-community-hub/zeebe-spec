@@ -1,24 +1,22 @@
 package io.zeebe.bpmnspec.runner.zeebe
 
 import io.zeebe.bpmnspec.runner.zeebe.zeeqs.ZeeqsClient
-import io.zeebe.client.ZeebeClient
-import io.zeebe.containers.ZeebeBrokerContainer
+import io.camunda.zeebe.client.ZeebeClient
 import io.zeebe.containers.ZeebeContainer
-import io.zeebe.containers.ZeebePort
 import org.slf4j.LoggerFactory
-import org.testcontainers.containers.BindMode
 import org.testcontainers.containers.GenericContainer
 import org.testcontainers.containers.Network
 import org.testcontainers.containers.wait.strategy.Wait
+import org.testcontainers.utility.DockerImageName
 
 class ZeebeEnvironment (
-        val zeebeImage : String = System.getProperty("zeebeImage", "camunda/zeebe-with-hazelcast-exporter"),
-        val zeebeImageVersion : String = System.getProperty("zeebeImageVersion", "0.24.4-0.10.0")) {
+        val zeebeImage : String = System.getProperty("zeebeImage", "ghcr.io/camunda-community-hub/zeebe-with-hazelcast-exporter"),
+        val zeebeImageVersion : String = System.getProperty("zeebeImageVersion", "1.0.0-1.0.0")) {
 
     private val logger = LoggerFactory.getLogger(ZeebeTestRunner::class.java)
 
-    val zeeqsImage = "camunda/zeeqs"
-    val zeeqsImageVersion: String = "1.0.0-alpha2"
+    val zeeqsImage = "ghcr.io/camunda-community-hub/zeeqs"
+    val zeeqsImageVersion: String = "2.0.0"
 
     private val zeebeHost = "zeebe"
     private val hazelcastPort = 5701
@@ -35,7 +33,8 @@ class ZeebeEnvironment (
         val network = Network.newNetwork()
         closingSteps.add(network)
 
-        val zeebeContainer = ZeebeContainer("$zeebeImage:$zeebeImageVersion")
+        val zeebeImageName = DockerImageName.parse("$zeebeImage:$zeebeImageVersion")
+        val zeebeContainer = ZeebeContainer(zeebeImageName)
                 .withExposedPorts(hazelcastPort)
                 .withNetwork(network)
                 .withNetworkAliases(zeebeHost)
@@ -57,7 +56,7 @@ class ZeebeEnvironment (
 
         zeebeClient = ZeebeClient
                 .newClientBuilder()
-                .brokerContactPoint(zeebeGatewayPort)
+                .gatewayAddress(zeebeGatewayPort)
                 .usePlaintext()
                 .build()
 
@@ -74,7 +73,7 @@ class ZeebeEnvironment (
         }
 
         val zeeqsContainer = ZeeqsContainer(zeeqsImage, zeeqsImageVersion)
-                .withEnv("zeebe.hazelcast.connection", "$zeebeHost:$hazelcastPort")
+                .withEnv("zeebe.client.worker.hazelcast.connection", "$zeebeHost:$hazelcastPort")
                 .withExposedPorts(zeeqsGraphqlPort)
                 .dependsOn(zeebeContainer)
                 .waitingFor(Wait.forHttp("/actuator/health"))

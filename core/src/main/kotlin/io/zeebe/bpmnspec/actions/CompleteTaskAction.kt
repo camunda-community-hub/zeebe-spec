@@ -3,7 +3,6 @@ package io.zeebe.bpmnspec.actions
 import io.zeebe.bpmnspec.api.Action
 import io.zeebe.bpmnspec.api.TestContext
 import io.zeebe.bpmnspec.api.runner.TestRunner
-import io.zeebe.bpmnspec.api.WorkflowInstanceContext
 
 class CompleteTaskAction(
         val jobType: String,
