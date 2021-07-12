@@ -21,12 +21,13 @@ class ZeeqsClient(val zeeqsEndpoint: String = "http://localhost:9000/graphql") {
         val responseBody = sendRequest("{ processInstances { nodes  { key, state } } }")
         val response = objectMapper.readValue<ProcessInstancesResponse>(responseBody)
 
-        return response.data.processInstances.nodes.map { it.key.toLong()  }
+        return response.data.processInstances.nodes.map { it.key.toLong() }
     }
 
     fun getProcessInstanceState(processInstanceKey: Long): String? {
 
-        val responseBody = sendRequest("{ processInstance(key: $processInstanceKey) { key, state } }")
+        val responseBody =
+            sendRequest("{ processInstance(key: $processInstanceKey) { key, state } }")
         val response = objectMapper.readValue<ProcessInstanceResponse>(responseBody)
 
         return response.data.processInstance?.state
@@ -34,15 +35,17 @@ class ZeeqsClient(val zeeqsEndpoint: String = "http://localhost:9000/graphql") {
 
     fun getElementInstances(processInstanceKey: Long): List<ElementInstanceDto> {
 
-        val responseBody = sendRequest("{ processInstance(key: $processInstanceKey) { elementInstances { elementId, elementName, state } } }")
+        val responseBody =
+            sendRequest("{ processInstance(key: $processInstanceKey) { elementInstances { elementId, elementName, state } } }")
         val response = objectMapper.readValue<ElementInstancesResponse>(responseBody)
 
         return response.data.processInstance?.elementInstances ?: emptyList()
     }
 
-    fun getWorkflowInstanceVariables(processInstanceKey: Long): List<VariableDto> {
+    fun getProcessInstanceVariables(processInstanceKey: Long): List<VariableDto> {
 
-        val responseBody = sendRequest("{ processInstance(key: $processInstanceKey) { variables { name, value, scope { elementId, elementName } } } }")
+        val responseBody =
+            sendRequest("{ processInstance(key: $processInstanceKey) { variables { name, value, scope { elementId, elementName } } } }")
         val response = objectMapper.readValue<VariablesResponse>(responseBody)
 
         return response.data.processInstance?.variables ?: emptyList()
@@ -50,7 +53,8 @@ class ZeeqsClient(val zeeqsEndpoint: String = "http://localhost:9000/graphql") {
 
     fun getIncidents(processInstanceKey: Long): List<IncidentDto> {
 
-        val responseBody = sendRequest("{ processInstance(key: $processInstanceKey) { incidents { errorType, errorMessage, state, elementInstance { elementId, elementName } } } }")
+        val responseBody =
+            sendRequest("{ processInstance(key: $processInstanceKey) { incidents { errorType, errorMessage, state, elementInstance { elementId, elementName } } } }")
         val response = objectMapper.readValue<IncidentsResponse>(responseBody)
 
         return response.data.processInstance?.incidents ?: emptyList()
@@ -60,20 +64,24 @@ class ZeeqsClient(val zeeqsEndpoint: String = "http://localhost:9000/graphql") {
         val requestBody = HttpRequest.BodyPublishers.ofString("""{ "query": "$query" }""")
 
         val request = HttpRequest.newBuilder()
-                .uri(URI.create("http://$zeeqsEndpoint"))
-                .header("Content-Type", "application/json")
-                .POST(requestBody)
-                .build()
+            .uri(URI.create("http://$zeeqsEndpoint"))
+            .header("Content-Type", "application/json")
+            .POST(requestBody)
+            .build()
 
         logger.trace("Send query request to ZeeQS: {}", query)
 
         val response = httpClient
-                .send(request, HttpResponse.BodyHandlers.ofString())
+            .send(request, HttpResponse.BodyHandlers.ofString())
 
         val statusCode = response.statusCode()
         val responseBody = response.body()
 
-        logger.trace("Received query response from ZeeQS: [status-code: {}, body: {}]", statusCode, responseBody)
+        logger.trace(
+            "Received query response from ZeeQS: [status-code: {}, body: {}]",
+            statusCode,
+            responseBody
+        )
 
         if (statusCode != 200) {
             throw RuntimeException("Failed to query ZeeQS. [status-code: $statusCode, body: $responseBody]")
@@ -93,7 +101,11 @@ class ZeeqsClient(val zeeqsEndpoint: String = "http://localhost:9000/graphql") {
     data class ElementInstancesResponse(val data: ElementInstancesDataDto)
     data class ElementInstancesDataDto(val processInstance: ElementInstancesDto?)
     data class ElementInstancesDto(val elementInstances: List<ElementInstanceDto>)
-    data class ElementInstanceDto(val state: String, val elementId: String, val elementName: String?)
+    data class ElementInstanceDto(
+        val state: String,
+        val elementId: String,
+        val elementName: String?
+    )
 
     data class VariablesResponse(val data: VariablesDataDto)
     data class VariablesDataDto(val processInstance: VariablesDto?)
@@ -104,6 +116,12 @@ class ZeeqsClient(val zeeqsEndpoint: String = "http://localhost:9000/graphql") {
     data class IncidentsResponse(val data: IncidentsDataDto)
     data class IncidentsDataDto(val processInstance: IncidentsDto?)
     data class IncidentsDto(val incidents: List<IncidentDto>)
-    data class IncidentDto(val errorType: String, val errorMessage: String?, val state: String, val elementInstance: IncidentElementInstanceDto?)
+    data class IncidentDto(
+        val errorType: String,
+        val errorMessage: String?,
+        val state: String,
+        val elementInstance: IncidentElementInstanceDto?
+    )
+
     data class IncidentElementInstanceDto(val elementId: String, val elementName: String?)
 }

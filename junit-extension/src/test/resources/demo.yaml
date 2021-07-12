@@ -2,7 +2,7 @@ resources:
   - demo.bpmn
 
 testCases:
-  - name: complete workflow
+  - name: complete process
     description: should work
 
     actions:
@@ -20,7 +20,7 @@ testCases:
           job_type: c
 
     verifications:
-      - verification: workflow-instance-state
+      - verification: process-instance-state
         args:
           state: completed
 
@@ -43,7 +43,7 @@ testCases:
           job_type: c
 
     verifications:
-      - verification: workflow-instance-variable
+      - verification: process-instance-variable
         args:
           name: x
           value: '1'

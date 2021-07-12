@@ -3,7 +3,7 @@ package io.zeebe.bpmnspec.runner.zeebe
 import io.zeebe.bpmnspec.api.TestSpec
 import io.zeebe.bpmnspec.api.runner.ElementInstanceState
 import io.zeebe.bpmnspec.api.runner.IncidentState
-import io.zeebe.bpmnspec.api.runner.WorkflowInstanceState
+import io.zeebe.bpmnspec.api.runner.ProcessInstanceState
 import io.zeebe.bpmnspec.builder.ElementSelector.Companion.byId
 import io.zeebe.bpmnspec.builder.ElementSelector.Companion.byName
 import io.zeebe.bpmnspec.builder.testSpec
@@ -14,7 +14,7 @@ class DemoTestSpecBuilder {
         fun demo(): TestSpec {
             return testSpec {
                 resources("demo.bpmn")
-                testCase(name = "complete workflow", description = "demo test case") {
+                testCase(name = "complete process", description = "demo test case") {
                     actions {
                         createInstance("demo")
                         completeTask("a")
@@ -22,7 +22,7 @@ class DemoTestSpecBuilder {
                         completeTask("c")
                     }
                     verifications {
-                        workflowInstanceState(WorkflowInstanceState.COMPLETED)
+                        processInstanceState(ProcessInstanceState.COMPLETED)
                     }
                 }
             }
@@ -31,22 +31,22 @@ class DemoTestSpecBuilder {
         fun demo2(): TestSpec {
             return testSpec {
                 resources("demo.bpmn")
-                testCase(name = "complete workflow", description = "demo test case") {
+                testCase(name = "complete process", description = "demo test case") {
                     actions {
-                        createInstance(bpmnProcessId = "demo", workflowInstanceAlias = "wf-1")
-                        createInstance(bpmnProcessId = "demo", workflowInstanceAlias = "wf-2")
+                        createInstance(bpmnProcessId = "demo", processInstanceAlias = "process-1")
+                        createInstance(bpmnProcessId = "demo", processInstanceAlias = "process-2")
                         completeTask("a")
                         completeTask("b")
                         completeTask("c")
                     }
                     verifications {
-                        workflowInstanceState(
-                            state = WorkflowInstanceState.COMPLETED,
-                            workflowInstanceAlias = "wf-1"
+                        processInstanceState(
+                            state = ProcessInstanceState.COMPLETED,
+                            processInstanceAlias = "process-1"
                         )
-                        workflowInstanceState(
-                            state = WorkflowInstanceState.TERMINATED,
-                            workflowInstanceAlias = "wf-2"
+                        processInstanceState(
+                            state = ProcessInstanceState.TERMINATED,
+                            processInstanceAlias = "process-2"
                         )
                     }
                 }
@@ -61,7 +61,7 @@ class DemoTestSpecBuilder {
                         createInstance(
                             bpmnProcessId = "demo2",
                             variables = mapOf("key" to "key-1"),
-                            workflowInstanceAlias = "wf-1"
+                            processInstanceAlias = "process-1"
                         )
                         awaitElementInstanceState(
                             byName("message-1"),
@@ -76,14 +76,14 @@ class DemoTestSpecBuilder {
                         completeTask("c")
                     }
                     verifications {
-                        workflowInstanceState(WorkflowInstanceState.COMPLETED)
+                        processInstanceState(ProcessInstanceState.COMPLETED)
                         elementInstanceState(
                             byId("Activity_1g1az2f"),
                             ElementInstanceState.COMPLETED
                         )
                         elementInstanceState(byName("b"), ElementInstanceState.TERMINATED)
-                        workflowInstanceVariable(variableName = "x", value = "1")
-                        noWorkflowInstanceVariable(variableName = "x", byName("message-1"))
+                        processInstanceVariable(variableName = "x", value = "1")
+                        noProcessInstanceVariable(variableName = "x", byName("message-1"))
                     }
                 }
 
@@ -100,7 +100,7 @@ class DemoTestSpecBuilder {
                         completeTask("c")
                     }
                     verifications {
-                        workflowInstanceState(WorkflowInstanceState.ACTIVATED)
+                        processInstanceState(ProcessInstanceState.ACTIVATED)
                         incidentState(
                             state = IncidentState.CREATED,
                             errorType = "EXTRACT_VALUE_ERROR",

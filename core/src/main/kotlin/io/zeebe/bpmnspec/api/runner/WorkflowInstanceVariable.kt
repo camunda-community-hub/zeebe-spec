@@ -1,6 +1,6 @@
 package io.zeebe.bpmnspec.api.runner
 
-data class WorkflowInstanceVariable(
+data class ProcessInstanceVariable(
         val variableName: String,
         val variableValue: String,
         val scopeElementId: String,

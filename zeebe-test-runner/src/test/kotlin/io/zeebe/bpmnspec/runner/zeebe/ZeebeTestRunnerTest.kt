@@ -2,17 +2,19 @@ package io.zeebe.bpmnspec.runner.zeebe
 
 import io.zeebe.bpmnspec.ClasspathResourceResolver
 import io.zeebe.bpmnspec.SpecRunner
-import io.zeebe.bpmnspec.api.runner.WorkflowInstanceState
+import io.zeebe.bpmnspec.api.runner.ProcessInstanceState
 import org.assertj.core.api.Assertions.assertThat
 import org.awaitility.kotlin.await
 import org.junit.jupiter.api.Test
 
 class ZeebeTestRunnerTest {
 
-    private val resourceResolver = ClasspathResourceResolver(classLoader = ZeebeTestRunnerTest::class.java.classLoader)
+    private val resourceResolver =
+        ClasspathResourceResolver(classLoader = ZeebeTestRunnerTest::class.java.classLoader)
     private val specRunner = SpecRunner(
-            testRunner = ZeebeTestRunner(),
-            resourceResolver = resourceResolver)
+        testRunner = ZeebeTestRunner(),
+        resourceResolver = resourceResolver
+    )
 
     @Test
     fun `ZeebeRunner should work standalone`() {
@@ -22,17 +24,17 @@ class ZeebeTestRunnerTest {
         runner.beforeEach()
 
         val bpmnXml = ZeebeTestRunnerTest::class.java.getResourceAsStream("/demo.bpmn")
-        runner.deployWorkflow("demo.bpmn", bpmnXml)
+        runner.deployProcess("demo.bpmn", bpmnXml)
 
-        val wfContext = runner.createWorkflowInstance("demo", "{}")
+        val wfContext = runner.createProcessInstance("demo", "{}")
 
         runner.completeTask("a", "{}")
         runner.completeTask("b", "{}")
         runner.completeTask("c", "{}")
 
         await.untilAsserted {
-            assertThat(runner.getWorkflowInstanceState(wfContext))
-                    .isEqualTo(WorkflowInstanceState.COMPLETED)
+            assertThat(runner.getProcessInstanceState(wfContext))
+                .isEqualTo(ProcessInstanceState.COMPLETED)
         }
 
         runner.afterEach()
@@ -124,7 +126,7 @@ class ZeebeTestRunnerTest {
         assertThat(testResult.output).hasSize(1)
 
         val testOutput = testResult.output[0];
-        assertThat(testOutput.state).isEqualTo(WorkflowInstanceState.COMPLETED)
+        assertThat(testOutput.state).isEqualTo(ProcessInstanceState.COMPLETED)
         assertThat(testOutput.elementInstances).hasSize(10)
         assertThat(testOutput.variables).isEmpty()
         assertThat(testOutput.incidents).isEmpty()

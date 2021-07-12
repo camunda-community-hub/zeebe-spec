@@ -9,7 +9,7 @@ testCases:
         args:
           bpmn_process_id: demo2
           variables: '{"key":"key-1"}'
-          workflow_instance_alias: wf-1
+          process_instance_alias: process-1
       - action: await-element-instance-state
         args:
           element_name: message-1
@@ -29,7 +29,7 @@ testCases:
           variables: '{}'
 
     verifications:
-      - verification: workflow-instance-state
+      - verification: process-instance-state
         args:
           state: completed
       - verification: element-instance-state
@@ -40,11 +40,11 @@ testCases:
         args:
           element_name: B
           state: terminated
-      - verification: workflow-instance-variable
+      - verification: process-instance-variable
         args:
           name: x
           value: '1'
-      - verification: no-workflow-instance-variable
+      - verification: no-process-instance-variable
         args:
           name: x
           element_name: message-1

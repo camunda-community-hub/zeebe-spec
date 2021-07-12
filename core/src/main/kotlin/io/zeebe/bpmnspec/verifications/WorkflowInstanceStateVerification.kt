@@ -4,27 +4,30 @@ import io.zeebe.bpmnspec.api.Verification
 import io.zeebe.bpmnspec.api.VerificationResult
 import io.zeebe.bpmnspec.api.ProcessInstanceContext
 import io.zeebe.bpmnspec.api.runner.TestRunner
-import io.zeebe.bpmnspec.api.runner.WorkflowInstanceState
+import io.zeebe.bpmnspec.api.runner.ProcessInstanceState
 
-class WorkflowInstanceStateVerification(
-        val state: WorkflowInstanceState,
-        val workflowInstance: String?
+class ProcessInstanceStateVerification(
+    val state: ProcessInstanceState,
+    val processInstance: String?
 ) : Verification {
 
-    override fun verify(runner: TestRunner, contexts: Map<String, ProcessInstanceContext>): VerificationResult {
+    override fun verify(
+        runner: TestRunner,
+        contexts: Map<String, ProcessInstanceContext>
+    ): VerificationResult {
 
-        val context = workflowInstance?.let { contexts[workflowInstance] }
-                ?: contexts.values.first()
+        val context = processInstance?.let { contexts[processInstance] }
+            ?: contexts.values.first()
 
-        val actualState = runner.getWorkflowInstanceState(context)
+        val actualState = runner.getProcessInstanceState(context)
 
         return if (actualState == state) {
             VerificationResult(isFulfilled = true)
         } else {
-            val alias = workflowInstance?.let { "'$it'" } ?: ""
+            val alias = processInstance?.let { "'$it'" } ?: ""
             VerificationResult(
-                    isFulfilled = false,
-                    failureMessage = "Expected the workflow instance $alias to be in state '$state' but was '$actualState'."
+                isFulfilled = false,
+                failureMessage = "Expected the process instance $alias to be in state '$state' but was '$actualState'."
             )
         }
     }
