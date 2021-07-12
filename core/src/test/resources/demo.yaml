@@ -2,7 +2,7 @@ resources:
   - demo.bpmn
 
 testCases:
-  - name: complete workflow
+  - name: complete process
     description: demo test case
 
     actions:
@@ -24,7 +24,7 @@ testCases:
           variables: '{}'
 
     verifications:
-      - verification: workflow-instance-state
+      - verification: process-instance-state
         args:
           state: completed
 

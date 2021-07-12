@@ -5,12 +5,12 @@ import io.zeebe.bpmnspec.api.TestContext
 import io.zeebe.bpmnspec.api.runner.TestRunner
 
 class CancelInstanceAction(
-        val workflowInstance: String?
+    val processInstance: String?
 ) : Action {
 
     override fun execute(runner: TestRunner, testContext: TestContext) {
-        val context = testContext.getContext(workflowInstance)
+        val context = testContext.getContext(processInstance)
 
-        runner.cancelWorkflowInstance(context)
+        runner.cancelProcessInstance(context)
     }
 }

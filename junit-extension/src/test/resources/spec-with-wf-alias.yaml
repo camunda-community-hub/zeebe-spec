@@ -8,7 +8,7 @@ testCases:
       - action: create-instance
         args:
           bpmn_process_id: exclusive-gateway
-          workflow_instance_alias: wf-1
+          process_instance_alias: process-1
       - action: complete-task
         args:
           job_type: a
@@ -19,7 +19,7 @@ testCases:
         args:
           element_name: B
           state: activated
-          workflow-instance: wf-1
+          process-instance: process-1
 
   - name: default-flow
     description: take the default flow
@@ -27,7 +27,7 @@ testCases:
       - action: create-instance
         args:
           bpmn_process_id: exclusive-gateway
-          workflow_instance_alias: wf-2
+          process_instance_alias: process-2
       - action: complete-task
         args:
           job_type: a
@@ -38,4 +38,4 @@ testCases:
         args:
           element_name: C
           state: activated
-          workflow-instance: wf-2
+          process-instance: process-2

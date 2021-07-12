@@ -10,10 +10,14 @@ import java.time.Duration
 import java.time.Instant
 
 class SpecRunner(
-        private val testRunner: TestRunner,
-        private val resourceResolver: ResourceResolver = DirectoryResourceResolver(rootDirectory = Path.of(".")),
-        private val verificationTimeout: Duration = Duration.ofSeconds(10),
-        private val verificationRetryInterval: Duration = Duration.ofMillis(10)
+    private val testRunner: TestRunner,
+    private val resourceResolver: ResourceResolver = DirectoryResourceResolver(
+        rootDirectory = Path.of(
+            "."
+        )
+    ),
+    private val verificationTimeout: Duration = Duration.ofSeconds(10),
+    private val verificationRetryInterval: Duration = Duration.ofMillis(10)
 ) {
 
     private val logger = LoggerFactory.getLogger(SpecRunner::class.java)
@@ -28,25 +32,28 @@ class SpecRunner(
         return runSpec(spec)
     }
 
-    fun runSpec(spec : TestSpec) : TestSpecResult {
+    fun runSpec(spec: TestSpec): TestSpecResult {
         logger.debug("Running {} tests", spec.testCases.size)
         testRunner.beforeAll()
 
         val testResults = spec.testCases.map {
             runTestCase(
-                    resources = spec.resources,
-                    testcase = it)
+                resources = spec.resources,
+                testcase = it
+            )
         }
 
         testRunner.afterAll()
 
-        logger.debug("All tests finished [{}/{} passed]",
-                testResults.filter { it.success }.count(),
-                testResults.size)
+        logger.debug(
+            "All tests finished [{}/{} passed]",
+            testResults.filter { it.success }.count(),
+            testResults.size
+        )
 
         return TestSpecResult(
-                spec = spec,
-                testResults = testResults
+            spec = spec,
+            testResults = testResults
         )
     }
 
@@ -54,8 +61,9 @@ class SpecRunner(
         logger.debug("Running a single test")
 
         val testResult = runTestCase(
-                resources = resources,
-                testcase = testcase)
+            resources = resources,
+            testcase = testcase
+        )
 
         return testResult
     }
@@ -64,16 +72,29 @@ class SpecRunner(
         logger.debug("Preparing the test [name: '{}']", testcase.name)
         testRunner.beforeEach()
 
-        logger.debug("Deploying resources for the test. [name: '{}', resources: {}]", testcase.name, resources.joinToString())
+        logger.debug(
+            "Deploying resources for the test. [name: '{}', resources: {}]",
+            testcase.name,
+            resources.joinToString()
+        )
         resources.forEach { resourceName ->
             val resourceStream = resourceResolver.getResource(resourceName)
-            testRunner.deployWorkflow(resourceName, resourceStream)
+            testRunner.deployProcess(resourceName, resourceStream)
         }
 
-        logger.debug("Run the test [name: '{}', description: '{}']", testcase.name, testcase.description)
+        logger.debug(
+            "Run the test [name: '{}', description: '{}']",
+            testcase.name,
+            testcase.description
+        )
         val result = runTestCase(testcase)
 
-        logger.debug("Test finished [name: '{}', success: '{}', message: '{}']", testcase.name, result.success, result.message)
+        logger.debug(
+            "Test finished [name: '{}', success: '{}', message: '{}']",
+            testcase.name,
+            result.success,
+            result.message
+        )
 
         testRunner.afterEach()
 
@@ -86,16 +107,17 @@ class SpecRunner(
 
         // TODO (saig0): handle case when the context is not found
         val testContext = TestContext(
-                storeContext = { alias, context -> contexts.put(alias, context) },
-                getContext = { alias -> alias.let { contexts[it] } ?: contexts.values.first()  },
-                verificationTimeout = verificationTimeout,
-                verificationRetryInterval = verificationRetryInterval
+            storeContext = { alias, context -> contexts.put(alias, context) },
+            getContext = { alias -> alias.let { contexts[it] } ?: contexts.values.first() },
+            verificationTimeout = verificationTimeout,
+            verificationRetryInterval = verificationRetryInterval
         )
 
         testcase.actions.forEach { it.execute(testRunner, testContext) }
 
         if (contexts.isEmpty()) {
-            testRunner.getWorkflowInstanceContexts().mapIndexed{ index, wfContext -> contexts.put("wf-$index", wfContext) }
+            testRunner.getProcessInstanceContexts()
+                .mapIndexed { index, wfContext -> contexts.put("process-$index", wfContext) }
         }
 
         val start = Instant.now()
@@ -120,33 +142,33 @@ class SpecRunner(
                 successfulVerifications.add(verification)
             } else {
                 return TestResult(
-                        testCase = testcase,
-                        success = false,
-                        message = result.failureMessage,
-                        successfulVerifications = successfulVerifications.toList(),
-                        failedVerification = verification,
-                        output = collectTestOutput()
+                    testCase = testcase,
+                    success = false,
+                    message = result.failureMessage,
+                    successfulVerifications = successfulVerifications.toList(),
+                    failedVerification = verification,
+                    output = collectTestOutput()
                 )
             }
         }
 
         return TestResult(
-                testCase = testcase,
-                success = true,
-                message = "",
-                successfulVerifications = successfulVerifications.toList(),
-                output = collectTestOutput()
+            testCase = testcase,
+            success = true,
+            message = "",
+            successfulVerifications = successfulVerifications.toList(),
+            output = collectTestOutput()
         )
     }
 
     private fun collectTestOutput(): List<TestOutput> {
-        return testRunner.getWorkflowInstanceContexts().map { context ->
+        return testRunner.getProcessInstanceContexts().map { context ->
             TestOutput(
-                    context = context,
-                    state = testRunner.getWorkflowInstanceState(context),
-                    elementInstances = testRunner.getElementInstances(context),
-                    variables = testRunner.getWorkflowInstanceVariables(context),
-                    incidents = testRunner.getIncidents(context)
+                context = context,
+                state = testRunner.getProcessInstanceState(context),
+                elementInstances = testRunner.getElementInstances(context),
+                variables = testRunner.getProcessInstanceVariables(context),
+                incidents = testRunner.getIncidents(context)
             )
         }
     }

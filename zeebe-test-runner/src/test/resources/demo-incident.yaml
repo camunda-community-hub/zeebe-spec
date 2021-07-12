@@ -16,7 +16,7 @@ testCases:
           job_type: c
 
     verifications:
-      - verification: workflow-instance-state
+      - verification: process-instance-state
         args:
           state: activated
       - verification: incident-state

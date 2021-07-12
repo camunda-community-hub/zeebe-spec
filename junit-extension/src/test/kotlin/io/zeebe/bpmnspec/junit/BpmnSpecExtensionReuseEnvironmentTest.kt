@@ -13,20 +13,21 @@ class BpmnSpecExtensionReuseEnvironmentTest {
 
     @Disabled("blocked by the bug #82")
     @ParameterizedTest
-    @BpmnSpecSource(specResources = ["spec-with-wf-alias.yaml"])
+    @BpmnSpecSource(specResources = ["spec-with-process-alias.yaml"])
     fun `exclusive gateway`(spec: BpmnSpecTestCase) {
 
-        val testResult = specRunner.runSingleTestCase(resources = spec.resources, testcase = spec.testCase)
+        val testResult =
+            specRunner.runSingleTestCase(resources = spec.resources, testcase = spec.testCase)
 
         assertThat(testResult.success)
-                .describedAs(testResult.message)
-                .isTrue()
+            .describedAs(testResult.message)
+            .isTrue()
     }
 
     companion object {
 
         private val testRunner = ZeebeTestRunner(
-                reuseEnvironment = true
+            reuseEnvironment = true
         )
 
         lateinit var specRunner: SpecRunner

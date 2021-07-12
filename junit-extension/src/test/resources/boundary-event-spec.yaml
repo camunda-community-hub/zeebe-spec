@@ -29,7 +29,7 @@ testCases:
         args:
           element_name: C
           state: activated
-      - verification: workflow-instance-variable
+      - verification: process-instance-variable
         args:
           name: x
           value: '1'

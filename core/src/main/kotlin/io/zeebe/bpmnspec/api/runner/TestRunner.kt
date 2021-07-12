@@ -13,9 +13,9 @@ interface TestRunner {
 
     fun afterAll()
 
-    fun deployWorkflow(name: String, bpmnXml: InputStream)
+    fun deployProcess(name: String, bpmnXml: InputStream)
 
-    fun createWorkflowInstance(bpmnProcessId: String, variables: String): ProcessInstanceContext
+    fun createProcessInstance(bpmnProcessId: String, variables: String): ProcessInstanceContext
 
     fun completeTask(jobType: String, variables: String)
 
@@ -23,15 +23,15 @@ interface TestRunner {
 
     fun throwError(jobType: String, errorCode: String, errorMessage: String)
 
-    fun cancelWorkflowInstance(context: ProcessInstanceContext)
+    fun cancelProcessInstance(context: ProcessInstanceContext)
 
-    fun getWorkflowInstanceContexts(): List<ProcessInstanceContext>
+    fun getProcessInstanceContexts(): List<ProcessInstanceContext>
 
-    fun getWorkflowInstanceState(context: ProcessInstanceContext): WorkflowInstanceState
+    fun getProcessInstanceState(context: ProcessInstanceContext): ProcessInstanceState
 
     fun getElementInstances(context: ProcessInstanceContext): List<ElementInstance>
 
-    fun getWorkflowInstanceVariables(context: ProcessInstanceContext): List<WorkflowInstanceVariable>
+    fun getProcessInstanceVariables(context: ProcessInstanceContext): List<ProcessInstanceVariable>
 
     fun getIncidents(context: ProcessInstanceContext): List<Incident>
 

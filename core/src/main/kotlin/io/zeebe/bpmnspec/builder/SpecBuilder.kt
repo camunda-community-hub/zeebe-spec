@@ -8,13 +8,13 @@ import io.zeebe.bpmnspec.api.TestSpec
 import io.zeebe.bpmnspec.api.Verification
 import io.zeebe.bpmnspec.api.runner.ElementInstanceState
 import io.zeebe.bpmnspec.api.runner.IncidentState
-import io.zeebe.bpmnspec.api.runner.WorkflowInstanceState
+import io.zeebe.bpmnspec.api.runner.ProcessInstanceState
 import io.zeebe.bpmnspec.verifications.*
 
 @DslMarker
 annotation class TestSpecMarker
 
-fun testSpec(init: TestSpecBuilder.() -> Unit) : TestSpec {
+fun testSpec(init: TestSpecBuilder.() -> Unit): TestSpec {
     val builder = TestSpecBuilder()
     builder.init()
     return builder.build()
@@ -37,7 +37,7 @@ class TestSpecBuilder {
         testCases.add(testCaseBuilder.build())
     }
 
-    fun build() : TestSpec {
+    fun build(): TestSpec {
         return TestSpec(resources, testCases);
     }
 }
@@ -63,7 +63,7 @@ class TestCaseBuilder(private val name: String, private val description: String?
         verifications.addAll(verificationsBuilder.build())
     }
 
-    fun build() : TestCase {
+    fun build(): TestCase {
         return TestCase(name, description, actions, verifications)
     }
 }
@@ -72,27 +72,52 @@ class TestCaseBuilder(private val name: String, private val description: String?
 class ActionsBuilder {
     private val actions = mutableListOf<Action>()
 
-    fun awaitElementInstanceState(selector: ElementSelector, state: ElementInstanceState, workflowInstanceAlias: String? = null) {
-        actions.add(AwaitElementInstanceStateAction(state, selector.elementId, selector.elementName, workflowInstanceAlias))
+    fun awaitElementInstanceState(
+        selector: ElementSelector,
+        state: ElementInstanceState,
+        processInstanceAlias: String? = null
+    ) {
+        actions.add(
+            AwaitElementInstanceStateAction(
+                state,
+                selector.elementId,
+                selector.elementName,
+                processInstanceAlias
+            )
+        )
     }
 
-    fun cancelInstance(workflowInstance: String? = null) {
-        actions.add(CancelInstanceAction(workflowInstance));
+    fun cancelInstance(processInstance: String? = null) {
+        actions.add(CancelInstanceAction(processInstance));
     }
 
-    fun completeTask(jobType : String, variables: Map<String, Any> = emptyMap()) {
+    fun completeTask(jobType: String, variables: Map<String, Any> = emptyMap()) {
         actions.add(CompleteTaskAction(jobType, serializeToJSON(variables)))
     }
 
-    fun createInstance(bpmnProcessId: String, variables: Map<String, Any> = emptyMap(), workflowInstanceAlias: String? = null ) {
-        actions.add(CreateInstanceAction(bpmnProcessId, serializeToJSON(variables), workflowInstanceAlias))
+    fun createInstance(
+        bpmnProcessId: String,
+        variables: Map<String, Any> = emptyMap(),
+        processInstanceAlias: String? = null
+    ) {
+        actions.add(
+            CreateInstanceAction(
+                bpmnProcessId,
+                serializeToJSON(variables),
+                processInstanceAlias
+            )
+        )
     }
 
-    fun publishMessage(messageName: String, correlationKey: String, variables: Map<String, Any> = emptyMap()) {
+    fun publishMessage(
+        messageName: String,
+        correlationKey: String,
+        variables: Map<String, Any> = emptyMap()
+    ) {
         actions.add(PublishMessageAction(messageName, correlationKey, serializeToJSON(variables)))
     }
 
-    fun throwError(jobType: String, errorCode: String, errorMessage: String = "" ) {
+    fun throwError(jobType: String, errorCode: String, errorMessage: String = "") {
         actions.add(ThrowErrorAction(jobType, errorCode, errorMessage));
     }
 
@@ -105,28 +130,89 @@ class ActionsBuilder {
 class VerificationsBuilder {
     private val verifications = mutableListOf<Verification>()
 
-    fun elementInstanceState(selector: ElementSelector, state: ElementInstanceState, workflowInstanceAlias: String? = null) {
-        verifications.add(ElementInstanceStateVerification(state, selector.elementId, selector.elementName, workflowInstanceAlias))
+    fun elementInstanceState(
+        selector: ElementSelector,
+        state: ElementInstanceState,
+        processInstanceAlias: String? = null
+    ) {
+        verifications.add(
+            ElementInstanceStateVerification(
+                state,
+                selector.elementId,
+                selector.elementName,
+                processInstanceAlias
+            )
+        )
     }
 
-    fun workflowInstanceState(state: WorkflowInstanceState, workflowInstanceAlias: String? = null) {
-        verifications.add(WorkflowInstanceStateVerification(state, workflowInstanceAlias))
+    fun processInstanceState(state: ProcessInstanceState, processInstanceAlias: String? = null) {
+        verifications.add(ProcessInstanceStateVerification(state, processInstanceAlias))
     }
 
-    fun workflowInstanceVariable(variableName: String, value: Any, selector: ElementSelector? = null, workflowInstanceAlias: String? = null) {
-        verifications.add(WorkflowInstanceVariableVerification(variableName, serializeToJSON(value), workflowInstanceAlias, selector?.elementId, selector?.elementName))
+    fun processInstanceVariable(
+        variableName: String,
+        value: Any,
+        selector: ElementSelector? = null,
+        processInstanceAlias: String? = null
+    ) {
+        verifications.add(
+            ProcessInstanceVariableVerification(
+                variableName,
+                serializeToJSON(value),
+                processInstanceAlias,
+                selector?.elementId,
+                selector?.elementName
+            )
+        )
     }
 
-    fun workflowInstanceVariables(variables : Map<String, Any>, selector: ElementSelector? = null, workflowInstanceAlias: String? = null) {
-        variables.forEach { (key, value) -> workflowInstanceVariable(key, value, selector, workflowInstanceAlias) };
+    fun processInstanceVariables(
+        variables: Map<String, Any>,
+        selector: ElementSelector? = null,
+        processInstanceAlias: String? = null
+    ) {
+        variables.forEach { (key, value) ->
+            processInstanceVariable(
+                key,
+                value,
+                selector,
+                processInstanceAlias
+            )
+        };
     }
 
-    fun noWorkflowInstanceVariable(variableName: String, selector: ElementSelector? = null, workflowInstanceAlias: String? = null) {
-        verifications.add(NoWorkflowInstanceVariableVerification(variableName, workflowInstanceAlias, selector?.elementId, selector?.elementName))
+    fun noProcessInstanceVariable(
+        variableName: String,
+        selector: ElementSelector? = null,
+        processInstanceAlias: String? = null
+    ) {
+        verifications.add(
+            NoProcessInstanceVariableVerification(
+                variableName,
+                processInstanceAlias,
+                selector?.elementId,
+                selector?.elementName
+            )
+        )
     }
 
-    fun incidentState(state: IncidentState, errorType: String, errorMessage: String?, selector: ElementSelector? = null, workflowInstanceAlias: String? = null) {
-        verifications.add(IncidentStateVerification(state, errorType, errorMessage, selector?.elementId, selector?.elementName, workflowInstanceAlias))
+    fun incidentState(
+        state: IncidentState,
+        errorType: String,
+        errorMessage: String?,
+        selector: ElementSelector? = null,
+        processInstanceAlias: String? = null
+    ) {
+        verifications.add(
+            IncidentStateVerification(
+                state,
+                errorType,
+                errorMessage,
+                selector?.elementId,
+                selector?.elementName,
+                processInstanceAlias
+            )
+        )
     }
 
     fun build(): List<Verification> {
@@ -136,6 +222,6 @@ class VerificationsBuilder {
 
 private val objectMapper = ObjectMapper()
 
-private fun serializeToJSON( input: Any) : String {
+private fun serializeToJSON(input: Any): String {
     return objectMapper.writeValueAsString(input);
 }

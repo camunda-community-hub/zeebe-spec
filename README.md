@@ -5,7 +5,7 @@
 [![](https://img.shields.io/badge/Lifecycle-Incubating-blue)](https://github.com/Camunda-Community-Hub/community/blob/main/extension-lifecycle.md#incubating-)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
-A tool to write tests for BPMN workflows.  
+A tool to write tests for BPMN processes.
 
 ![The idea](docs/bpmn-spec.png)
 
@@ -24,8 +24,8 @@ Available integrations:
 
 Example spec with one test case:
 
-
 *YAML Spec*
+
 ```yaml
 resources:
   - exclusive-gateway.bpmn
@@ -52,46 +52,54 @@ testCases:
 _More examples can be found here: https://github.com/zeebe-io/bpmn-tck_
 
 *Kotlin Spec*
+
 ```kotlin
 val testSpecFulfillCondition =
-        testSpec {
-            resources("exclusive-gateway.bpmn")
+  testSpec {
+    resources("exclusive-gateway.bpmn")
 
-            testCase(name = "fulfill-condition", description = "should fulfill the condition and enter the upper task") {
-                actions {
-                    createInstance(bpmnProcessId = "exclusive-gateway")
-                    completeTask(jobType = "a", variables = mapOf("x" to 8))
-                }
-                verifications {
-                    elementInstanceState(selector = byName("B"), state = ElementInstanceState.ACTIVATED )
-                }
-            }
-        };
+    testCase(
+      name = "fulfill-condition",
+      description = "should fulfill the condition and enter the upper task"
+    ) {
+      actions {
+        createInstance(bpmnProcessId = "exclusive-gateway")
+        completeTask(jobType = "a", variables = mapOf("x" to 8))
+      }
+      verifications {
+        elementInstanceState(selector = byName("B"), state = ElementInstanceState.ACTIVATED)
+      }
+    }
+  };
 ```
-
 
 ### The Spec
 
-A spec is written in a YAML text format, or alternative in Kotlin code. It contains the following elements:
+A spec is written in a YAML text format, or alternative in Kotlin code. It contains the following
+elements:
 
 * `resources`: a list of BPMN files that are used in test cases
 * `testCases`: a list of test cases, each test case contains the following elements
-  * `name`: the (short) name of the test case
-  * `description`: (optional) an additional description of the test case
-  * `actions`: a list of actions that are applied in order
-  * `verifications`: a list of verifications that are checked in order after all actions are applied
+    * `name`: the (short) name of the test case
+    * `description`: (optional) an additional description of the test case
+    * `actions`: a list of actions that are applied in order
+    * `verifications`: a list of verifications that are checked in order after all actions are
+      applied
 
 ### Actions
 
-Actions drive the test case forward until the result is checked using the verifications. The following actions are available:
+Actions drive the test case forward until the result is checked using the verifications. The
+following actions are available:
 
 ### create-instance
 
-Create a new instance of a workflow.
+Create a new instance of a process.
 
-* `bpmn_process_id`: the BPMN process id of the workflow
+* `bpmn_process_id`: the BPMN process id of the process
 * `variables`: (optional) initial variables/payload to create the instance with
-* `workflow_instance_alias`: (optional) an alias that can be used in following actions and verifications to reference this instance. This can be useful if multiple instances are created.
+* `process_instance_alias`: (optional) an alias that can be used in following actions and
+  verifications to reference this instance. This can be useful if multiple instances are created.
+
 ```
       - action: create-instance
         args:
@@ -105,6 +113,7 @@ Complete tasks of a given type.
 
 * `job_type`: the type or identifier of the job/task
 * `variables`: (optional) variables/payload to complete the tasks with
+
 ```
       - action: complete-task
         args:
@@ -118,7 +127,8 @@ Throw error events for tasks of a given type.
 
 * `job_type`: the type or identifier of the job/task
 * `error_code`: the error code that is used to correlate the error to an catch event
-* `error_message`: (optional) an additional message of the error event  
+* `error_message`: (optional) an additional message of the error event
+
 ```
       - action: throw-error
         args:
@@ -131,8 +141,9 @@ Throw error events for tasks of a given type.
 Publish a new message event.
 
 * `message_name`: the name of the message
-* `correlation_key`: the key that is used to correlate the message to a workflow instance
+* `correlation_key`: the key that is used to correlate the message to a process instance
 * `variables`: (optional) variables/payload to publish the message with
+
 ```
       - action: publish-message
         args:
@@ -143,23 +154,30 @@ Publish a new message event.
 
 ### cancel-instance
 
-Cancel/terminate a workflow instance.
+Cancel/terminate a process instance.
 
-* `workflow_instance`: (optional) the alias of a workflow instance that is canceled. The alias is defined in the `create-instance` action. If only one instance is created then the alias is not required.
+* `process_instance`: (optional) the alias of a process instance that is canceled. The alias is
+  defined in the `create-instance` action. If only one instance is created then the alias is not
+  required.
+
 ```
       - action: cancel-instance
         args:
-          workflow_instance: wf-1
+          process_instance: process-1
 ```
 
 ### await-element-instance-state
 
-Await until an element of the workflow instance is in the given state.
+Await until an element of the process instance is in the given state.
 
-* `state`: the state of the element to wait for. Must be one of: `activated | completed | terminated | taken` 
-* `element_name`: (optional) the name of the element in the workflow
-* `element_id`: (optional) as an alternative to the name, the element can be identified by its id in the workflow
-* `workflow_instance`: (optional) the alias of a workflow instance. The alias is defined in the `create-instance` action. If only one instance is created then the alias is not required.
+* `state`: the state of the element to wait for. Must be one
+  of: `activated | completed | terminated | taken`
+* `element_name`: (optional) the name of the element in the process
+* `element_id`: (optional) as an alternative to the name, the element can be identified by its id in
+  the process
+* `process_instance`: (optional) the alias of a process instance. The alias is defined in
+  the `create-instance` action. If only one instance is created then the alias is not required.
+
 ```
       - action: await-element-instance-state
         args:
@@ -169,28 +187,34 @@ Await until an element of the workflow instance is in the given state.
 
 ### Verifications
 
-Verifications check the result of the test case after all actions are applied. The following verifications are available:
+Verifications check the result of the test case after all actions are applied. The following
+verifications are available:
 
-### workflow-instance-state
+### process-instance-state
 
-Check if the workflow instance is in a given state.
+Check if the process instance is in a given state.
 
-* `state`: the state of the workflow instance. Must be one of: `activated | completed | terminated` 
-* `workflow_instance`: (optional) the alias of a workflow instance. The alias is defined in the `create-instance` action. If only one instance is created then the alias is not required.
+* `state`: the state of the process instance. Must be one of: `activated | completed | terminated`
+* `process_instance`: (optional) the alias of a process instance. The alias is defined in
+  the `create-instance` action. If only one instance is created then the alias is not required.
+
 ```
-      - verification: workflow-instance-state
+      - verification: process-instance-state
         args:
           state: completed
 ```
 
 ### element-instance-state
 
-Check if an element of the workflow instance is in a given state.
+Check if an element of the process instance is in a given state.
 
-* `state`: the state of the element. Must be one of: `activated | completed | terminated | taken` 
-* `element_name`: (optional) the name of the element in the workflow
-* `element_id`: (optional) as an alternative to the name, the element can be identified by its id in the workflow
-* `workflow_instance`: (optional) the alias of a workflow instance. The alias is defined in the `create-instance` action. If only one instance is created then the alias is not required.
+* `state`: the state of the element. Must be one of: `activated | completed | terminated | taken`
+* `element_name`: (optional) the name of the element in the process
+* `element_id`: (optional) as an alternative to the name, the element can be identified by its id in
+  the process
+* `process_instance`: (optional) the alias of a process instance. The alias is defined in
+  the `create-instance` action. If only one instance is created then the alias is not required.
+
 ```
       - verification: element-instance-state
         args:
@@ -198,32 +222,42 @@ Check if an element of the workflow instance is in a given state.
           state: activated
 ```
 
-### workflow-instance-variable
+### process-instance-variable
 
-Check if the workflow instance has a variable with the given name and value. If the element name or id is set then it checks only for (local) variables in the scope of the element.
+Check if the process instance has a variable with the given name and value. If the element name or
+id is set then it checks only for (local) variables in the scope of the element.
 
 * `name`: the name of the variable
 * `value`: the value of the variable
-* `element_name`: (optional) the name of the element in the workflow that has the variable in its scope
-* `element_id`: (optional) as an alternative to the name, the element can be identified by its id in the workflow
-* `workflow_instance`: (optional) the alias of a workflow instance. The alias is defined in the `create-instance` action. If only one instance is created then the alias is not required.
+* `element_name`: (optional) the name of the element in the process that has the variable in its
+  scope
+* `element_id`: (optional) as an alternative to the name, the element can be identified by its id in
+  the process
+* `process_instance`: (optional) the alias of a process instance. The alias is defined in
+  the `create-instance` action. If only one instance is created then the alias is not required.
+
 ```
-      - verification: workflow-instance-variable
+      - verification: process-instance-variable
         args:
           name: x
           value: '1'
 ```
 
-### no-workflow-instance-variable
+### no-process-instance-variable
 
-Check if the workflow instance has no variable with the given name. If the element name or id is set then it checks only for (local) variables in the scope of the element.
+Check if the process instance has no variable with the given name. If the element name or id is set
+then it checks only for (local) variables in the scope of the element.
 
 * `name`: the name of the variable
-* `element_name`: (optional) the name of the element in the workflow that has the variable in its scope
-* `element_id`: (optional) as an alternative to the name, the element can be identified by its id in the workflow
-* `workflow_instance`: (optional) the alias of a workflow instance. The alias is defined in the `create-instance` action. If only one instance is created then the alias is not required.
+* `element_name`: (optional) the name of the element in the process that has the variable in its
+  scope
+* `element_id`: (optional) as an alternative to the name, the element can be identified by its id in
+  the process
+* `process_instance`: (optional) the alias of a process instance. The alias is defined in
+  the `create-instance` action. If only one instance is created then the alias is not required.
+
 ```
-      - verification: no-workflow-instance-variable
+      - verification: no-process-instance-variable
         args:
           name: y
           element_name: B
@@ -231,14 +265,19 @@ Check if the workflow instance has no variable with the given name. If the eleme
 
 ### incident-state
 
-Check if the workflow instance has an incident in the given state. If the element name or id is set then it checks only for incidents in the scope of the element.
+Check if the process instance has an incident in the given state. If the element name or id is set
+then it checks only for incidents in the scope of the element.
 
-* `state`: the state of the incident. Must be one of: `created | resolved` 
+* `state`: the state of the incident. Must be one of: `created | resolved`
 * `errorType`: the type/classifier of the incident
 * `errorMessage`: (optional) the error message of the incident
-* `element_name`: (optional) the name of the element in the workflow that has the incident in its scope
-* `element_id`: (optional) as an alternative to the name, the element can be identified by its id in the workflow
-* `workflow_instance`: (optional) the alias of a workflow instance. The alias is defined in the `create-instance` action. If only one instance is created then the alias is not required.
+* `element_name`: (optional) the name of the element in the process that has the incident in its
+  scope
+* `element_id`: (optional) as an alternative to the name, the element can be identified by its id in
+  the process
+* `process_instance`: (optional) the alias of a process instance. The alias is defined in
+  the `create-instance` action. If only one instance is created then the alias is not required.
+
 ```
       - verification: incident-state
         args:
@@ -250,7 +289,9 @@ Check if the workflow instance has an incident in the given state. If the elemen
 
 ## Install
 
-The tests can be run by calling the [SpecRunner](/core/src/main/kotlin/io/zeebe/bpmnspec/SpecRunner.kt) directly in code, or by using the JUnit integration. 
+The tests can be run by calling
+the [SpecRunner](/core/src/main/kotlin/io/zeebe/bpmnspec/SpecRunner.kt) directly in code, or by
+using the JUnit integration.
 
 ### JUnit Integration (generic)
 
@@ -304,23 +345,27 @@ class BpmnTest(factory: SpecRunnerFactory) {
 }
 ```
 
-* annotate the class with `@BpmnSpecRunner` 
-* create an instance of the `SpecRunner` with the test runner that corresponds to the engine you want to test
-  * the `SpecRunnerFactory` can be injected in the constructor, a `beforeEach`/`beforeAll` method, or the test method
+* annotate the class with `@BpmnSpecRunner`
+* create an instance of the `SpecRunner` with the test runner that corresponds to the engine you
+  want to test
+    * the `SpecRunnerFactory` can be injected in the constructor, a `beforeEach`/`beforeAll` method,
+      or the test method
 * annotate the test method with `@ParameterizedTest` and `@BpmnSpecSource`
-  * the parameter `specResources` lists the spec files to run 
-  * add a method parameter of the type `BpmnSpecTestCase` that holds the resources and the parsed spec
-* run the test cases in the test method using `SpecRunner.runSingleTestCase()` and pass the parameter `BpmnSpecTestCase` in it
+    * the parameter `specResources` lists the spec files to run
+    * add a method parameter of the type `BpmnSpecTestCase` that holds the resources and the parsed
+      spec
+* run the test cases in the test method using `SpecRunner.runSingleTestCase()` and pass the
+  parameter `BpmnSpecTestCase` in it
 * verify the test results with the return value
 
 4) Run the JUnit test class
 
 ![Junit test results](docs/bpmn-spec-junit.png)
 
-
 ### JUnit Integration (ZeebeTestRunner)
 
-This repository contains an integration for JUnit 5 using the extension API. To run the BPMN tests against Zeebe:  
+This repository contains an integration for JUnit 5 using the extension API. To run the BPMN tests
+against Zeebe:
 
 1) Add the Maven dependency for the Zeebe test runner:
 
@@ -334,7 +379,9 @@ This repository contains an integration for JUnit 5 using the extension API. To 
 </dependency>
 ```    
 
-2) Optionally, specify the image of Zeebe (with enabled Hazelcast exporter) to use for the tests. (if system properties are not set, then defaults will be used)
+2) Optionally, specify the image of Zeebe (with enabled Hazelcast exporter) to use for the tests. (
+   if system properties are not set, then defaults will be used)
+
 ```
 <project>
   [...]
@@ -355,7 +402,9 @@ This repository contains an integration for JUnit 5 using the extension API. To 
   [...]
 </project>
 ```
-3) Write a JUnit test class like the one mentioned above and use this line to select the `ZeebeTestRunner`:
+
+3) Write a JUnit test class like the one mentioned above and use this line to select
+   the `ZeebeTestRunner`:
 
 ```
 private val specRunner = factory.create(testRunner = ZeebeTestRunner())

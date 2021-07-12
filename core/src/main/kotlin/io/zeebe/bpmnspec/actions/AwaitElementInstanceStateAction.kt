@@ -11,10 +11,10 @@ class AwaitElementInstanceStateAction(
         val state: ElementInstanceState,
         val elementId: String?,
         val elementName: String?,
-        val workflowInstance: String?) : Action {
+        val processInstance: String?) : Action {
 
     override fun execute(runner: TestRunner, testContext: TestContext) {
-        val context = testContext.getContext(workflowInstance)
+        val context = testContext.getContext(processInstance)
 
         val start = Instant.now()
 
