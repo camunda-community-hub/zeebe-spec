@@ -47,7 +47,7 @@ class ZeebeEnvironment(
     private fun startZeebeContainer(network: Network) {
         val zeebeImageName = DockerImageName.parse("$zeebeImage:$zeebeImageVersion")
         val zeebeContainer = ZeebeContainer(zeebeImageName)
-            .withExposedPorts(hazelcastPort)
+            .withAdditionalExposedPort(hazelcastPort)
             .withNetwork(network)
             .withNetworkAliases(zeebeHost)
 
