@@ -32,7 +32,7 @@
 
     <hazelcast.exporter.version>1.0.0</hazelcast.exporter.version>
 
-    <zeebe-test-container.version>3.2.0</zeebe-test-container.version>
+    <zeebe-test-container.version>3.3.0</zeebe-test-container.version>
     <test-container.version>1.16.3</test-container.version>
 
     <!-- release parent settings -->
