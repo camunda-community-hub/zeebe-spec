@@ -8,7 +8,7 @@ import java.io.InputStream
 import java.time.Duration
 
 class ZeebeTestRunner(
-    private val environment: ZeebeEnvironment = ZeebeEnvironment(),
+    private val environment: TestEnvironment = ZeebeEnvironment(),
     private val reuseEnvironment: Boolean = false,
     private val beforeEachCallback: (ZeebeTestContext) -> Unit = {},
     private val afterEachCallback: (ZeebeTestContext) -> Unit = {}

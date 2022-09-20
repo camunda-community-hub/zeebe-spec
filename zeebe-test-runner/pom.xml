@@ -22,6 +22,16 @@
     </dependency>
 
     <dependency>
+      <groupId>org.camunda.community</groupId>
+      <artifactId>eze</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>io.zeebe.hazelcast</groupId>
+      <artifactId>zeebe-hazelcast-exporter</artifactId>
+    </dependency>
+
+    <dependency>
       <groupId>io.zeebe</groupId>
       <artifactId>zeebe-test-container</artifactId>
     </dependency>
@@ -75,6 +85,11 @@
     <dependency>
       <groupId>org.awaitility</groupId>
       <artifactId>awaitility-kotlin</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-params</artifactId>
       <scope>test</scope>
     </dependency>
 

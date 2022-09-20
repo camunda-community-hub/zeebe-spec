@@ -3,23 +3,23 @@ package io.zeebe.bpmnspec.runner.zeebe
 import io.zeebe.bpmnspec.ClasspathResourceResolver
 import io.zeebe.bpmnspec.SpecRunner
 import io.zeebe.bpmnspec.api.runner.ProcessInstanceState
+import io.zeebe.bpmnspec.runner.zeebe.eze.EzeTestEnvironment
 import org.assertj.core.api.Assertions.assertThat
 import org.awaitility.kotlin.await
-import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtensionContext
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.Arguments
+import org.junit.jupiter.params.provider.ArgumentsProvider
+import org.junit.jupiter.params.provider.ArgumentsSource
+import java.util.stream.Stream
 
 class ZeebeTestRunnerTest {
 
-    private val resourceResolver =
-        ClasspathResourceResolver(classLoader = ZeebeTestRunnerTest::class.java.classLoader)
-    private val specRunner = SpecRunner(
-        testRunner = ZeebeTestRunner(),
-        resourceResolver = resourceResolver
-    )
+    @ParameterizedTest
+    @ArgumentsSource(TestEnvironmentArgumentsProvider::class)
+    fun `ZeebeRunner should work standalone`(testEnvironment: TestEnvironment) {
 
-    @Test
-    fun `ZeebeRunner should work standalone`() {
-
-        val runner = ZeebeTestRunner()
+        val runner = ZeebeTestRunner(testEnvironment)
 
         runner.beforeEach()
 
@@ -40,8 +40,9 @@ class ZeebeTestRunnerTest {
         runner.afterEach()
     }
 
-    @Test
-    fun `Runner with ZeebeTestRunner should run the YAML spec`() {
+    @ParameterizedTest
+    @ArgumentsSource(SpecRunnerWithDifferentTestEnvironmentArgumentsProvider::class)
+    fun `Runner with ZeebeTestRunner should run the YAML spec`(specRunner: SpecRunner) {
 
         val spec = ZeebeTestRunnerTest::class.java.getResourceAsStream("/demo.yaml")
         val result = specRunner.runSpec(spec)
@@ -49,8 +50,9 @@ class ZeebeTestRunnerTest {
         assertThat(result.testResults).hasSize(1)
     }
 
-    @Test
-    fun `Runner with ZeebeTestRunner should run the Kotlin spec`() {
+    @ParameterizedTest
+    @ArgumentsSource(SpecRunnerWithDifferentTestEnvironmentArgumentsProvider::class)
+    fun `Runner with ZeebeTestRunner should run the Kotlin spec`(specRunner: SpecRunner) {
 
         val spec = DemoTestSpecBuilder.demo()
         val result = specRunner.runSpec(spec)
@@ -58,8 +60,9 @@ class ZeebeTestRunnerTest {
         assertThat(result.testResults).hasSize(1)
     }
 
-    @Test
-    fun `should run the YAML spec with message`() {
+    @ParameterizedTest
+    @ArgumentsSource(SpecRunnerWithDifferentTestEnvironmentArgumentsProvider::class)
+    fun `should run the YAML spec with message`(specRunner: SpecRunner) {
 
         val spec = ZeebeTestRunnerTest::class.java.getResourceAsStream("/demo3.yaml")
         val result = specRunner.runSpec(spec)
@@ -67,8 +70,9 @@ class ZeebeTestRunnerTest {
         assertThat(result.testResults).hasSize(1)
     }
 
-    @Test
-    fun `should run the Kotlin spec with message`() {
+    @ParameterizedTest
+    @ArgumentsSource(SpecRunnerWithDifferentTestEnvironmentArgumentsProvider::class)
+    fun `should run the Kotlin spec with message`(specRunner: SpecRunner) {
 
         val spec = DemoTestSpecBuilder.demo3()
         val result = specRunner.runSpec(spec)
@@ -77,8 +81,9 @@ class ZeebeTestRunnerTest {
     }
 
 
-    @Test
-    fun `should run the YAML spec with incident`() {
+    @ParameterizedTest
+    @ArgumentsSource(SpecRunnerWithDifferentTestEnvironmentArgumentsProvider::class)
+    fun `should run the YAML spec with incident`(specRunner: SpecRunner) {
 
         val spec = ZeebeTestRunnerTest::class.java.getResourceAsStream("/demo-incident.yaml")
         val result = specRunner.runSpec(spec)
@@ -86,8 +91,9 @@ class ZeebeTestRunnerTest {
         assertThat(result.testResults).hasSize(1)
     }
 
-    @Test
-    fun `should run the Kotlin spec with incident`() {
+    @ParameterizedTest
+    @ArgumentsSource(SpecRunnerWithDifferentTestEnvironmentArgumentsProvider::class)
+    fun `should run the Kotlin spec with incident`(specRunner: SpecRunner) {
 
         val spec = DemoTestSpecBuilder.demoIncident()
         val result = specRunner.runSpec(spec)
@@ -96,8 +102,9 @@ class ZeebeTestRunnerTest {
     }
 
 
-    @Test
-    fun `should fail verification`() {
+    @ParameterizedTest
+    @ArgumentsSource(SpecRunnerWithDifferentTestEnvironmentArgumentsProvider::class)
+    fun `should fail verification`(specRunner: SpecRunner) {
 
         val spec = ZeebeTestRunnerTest::class.java.getResourceAsStream("/failed-test-case.yaml")
         val result = specRunner.runSpec(spec)
@@ -113,8 +120,9 @@ class ZeebeTestRunnerTest {
         assertThat(testResult.failedVerification).isEqualTo(testResult.testCase.verifications[1])
     }
 
-    @Test
-    fun `should collect output`() {
+    @ParameterizedTest
+    @ArgumentsSource(SpecRunnerWithDifferentTestEnvironmentArgumentsProvider::class)
+    fun `should collect output`(specRunner: SpecRunner) {
 
         val spec = ZeebeTestRunnerTest::class.java.getResourceAsStream("/demo.yaml")
         val result = specRunner.runSpec(spec)
@@ -132,4 +140,32 @@ class ZeebeTestRunnerTest {
         assertThat(testOutput.incidents).isEmpty()
     }
 
+    class SpecRunnerWithDifferentTestEnvironmentArgumentsProvider : ArgumentsProvider {
+
+        override fun provideArguments(context: ExtensionContext): Stream<out Arguments> {
+            val resourceResolver = ClasspathResourceResolver(classLoader = ZeebeTestRunnerTest::class.java.classLoader)
+            return Stream.of(
+                Arguments.of(
+                    SpecRunner(
+                        testRunner = ZeebeTestRunner(),
+                        resourceResolver = resourceResolver
+                    )
+                ),
+                Arguments.of(
+                    SpecRunner(
+                        testRunner = ZeebeTestRunner(EzeTestEnvironment()),
+                        resourceResolver = resourceResolver
+                    )
+                )
+            )
+        }
+    }
+
+    class TestEnvironmentArgumentsProvider : ArgumentsProvider {
+        override fun provideArguments(context: ExtensionContext): Stream<out Arguments> = Stream.of(
+            Arguments.of(EzeTestEnvironment()),
+            Arguments.of(ZeebeEnvironment())
+        )
+
+    }
 }

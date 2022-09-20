@@ -32,6 +32,8 @@
 
     <hazelcast.exporter.version>1.0.0</hazelcast.exporter.version>
 
+    <eze.version>1.0.2</eze.version>
+    <zeebe-hazelcast-exporter.version>1.2.1</zeebe-hazelcast-exporter.version>
     <zeebe-test-container.version>3.5.2</zeebe-test-container.version>
     <test-container.version>1.17.5</test-container.version>
 
@@ -77,6 +79,18 @@
         <version>2.13.4.20221013</version>
         <type>pom</type>
         <scope>import</scope>
+      </dependency>
+
+      <dependency>
+        <groupId>org.camunda.community</groupId>
+        <artifactId>eze</artifactId>
+        <version>${eze.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>io.zeebe.hazelcast</groupId>
+        <artifactId>zeebe-hazelcast-exporter</artifactId>
+        <version>${zeebe-hazelcast-exporter.version}</version>
       </dependency>
 
       <dependency>

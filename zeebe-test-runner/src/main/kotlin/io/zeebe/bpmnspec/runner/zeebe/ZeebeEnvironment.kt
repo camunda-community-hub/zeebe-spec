@@ -15,7 +15,7 @@ class ZeebeEnvironment(
         "ghcr.io/camunda-community-hub/zeebe-with-hazelcast-exporter"
     ),
     val zeebeImageVersion: String = System.getProperty("zeebeImageVersion", "1.0.0-1.0.0")
-) {
+) : TestEnvironment{
 
     private val logger = LoggerFactory.getLogger(ZeebeTestRunner::class.java)
 
@@ -28,12 +28,12 @@ class ZeebeEnvironment(
 
     private val closingSteps = mutableListOf<AutoCloseable>()
 
-    lateinit var zeebeClient: ZeebeClient
-    lateinit var zeeqsClient: ZeeqsClient
+    override lateinit var zeebeClient: ZeebeClient
+    override lateinit var zeeqsClient: ZeeqsClient
 
-    var isRunning = false
+    override var isRunning = false
 
-    fun setup() {
+    override fun setup() {
         val network = Network.newNetwork()!!
         closingSteps.add(network)
 
@@ -112,7 +112,7 @@ class ZeebeEnvironment(
         zeeqsClient = ZeeqsClient(zeeqsEndpoint = "$zeeqsContainerHost:$zeeqsContainerPort/graphql")
     }
 
-    fun cleanUp() {
+    override fun cleanUp() {
         logger.debug("Closing resources")
         closingSteps.toList().reversed().forEach(AutoCloseable::close)
 
