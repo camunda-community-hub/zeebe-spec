@@ -6,6 +6,8 @@ import io.zeebe.bpmnspec.runner.zeebe.zeeqs.ZeeqsClient
 interface TestEnvironment {
     val zeebeClient: ZeebeClient
     val zeeqsClient: ZeeqsClient
+    val zeebeEventRepository: ZeebeEventRepository
+    val zeebeService: ZeebeService
 
     val isRunning: Boolean
 

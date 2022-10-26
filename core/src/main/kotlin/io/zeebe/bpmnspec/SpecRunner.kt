@@ -78,8 +78,9 @@ class SpecRunner(
             resources.joinToString()
         )
         resources.forEach { resourceName ->
-            val resourceStream = resourceResolver.getResource(resourceName)
-            testRunner.deployProcess(resourceName, resourceStream)
+            resourceResolver.getResource(resourceName).use {
+                testRunner.deployProcess(resourceName, it)
+            }
         }
 
         logger.debug(
