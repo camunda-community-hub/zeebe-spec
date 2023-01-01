@@ -17,9 +17,9 @@ A tool to write tests for BPMN processes.
 
 Available integrations:
 
-| Workflow Engine | Test Runner Dependency |
-| --- | ---|
-| [Zeebe](https://github.com/camunda-cloud/zeebe)  | `<artifactId>zeebe-test-runner</artifactId>` | 
+| Workflow Engine                                 | Test Runner Dependency                       |
+|-------------------------------------------------|----------------------------------------------|
+| [Zeebe](https://github.com/camunda-cloud/zeebe) | `<artifactId>zeebe-test-runner</artifactId>` | 
 
 ## Usage
 
@@ -56,22 +56,22 @@ _More examples can be found here: https://github.com/zeebe-io/bpmn-tck_
 
 ```kotlin
 val testSpecFulfillCondition =
-  testSpec {
-    resources("exclusive-gateway.bpmn")
+    testSpec {
+        resources("exclusive-gateway.bpmn")
 
-    testCase(
-      name = "fulfill-condition",
-      description = "should fulfill the condition and enter the upper task"
-    ) {
-      actions {
-        createInstance(bpmnProcessId = "exclusive-gateway")
-        completeTask(jobType = "a", variables = mapOf("x" to 8))
-      }
-      verifications {
-        elementInstanceState(selector = byName("B"), state = ElementInstanceState.ACTIVATED)
-      }
-    }
-  };
+        testCase(
+            name = "fulfill-condition",
+            description = "should fulfill the condition and enter the upper task"
+        ) {
+            actions {
+                createInstance(bpmnProcessId = "exclusive-gateway")
+                completeTask(jobType = "a", variables = mapOf("x" to 8))
+            }
+            verifications {
+                elementInstanceState(selector = byName("B"), state = ElementInstanceState.ACTIVATED)
+            }
+        }
+    };
 ```
 
 ### The Spec
@@ -412,3 +412,29 @@ private val specRunner = factory.create(testRunner = ZeebeTestRunner())
 ```
 
 4) Follow the other steps as mentioned [above](#junit-integration-generic)
+
+### JUnit Integration (EzeTestRunner)
+
+This repository contains an integration for JUnit 5 using the extension API. To run the BPMN tests
+against [EZE](https://github.com/camunda-community-hub/eze) (Embedded Zeebe Engine):
+
+1) Add the Maven dependency for the Zeebe test runner:
+
+```
+<!-- running the spec with EZE -->
+<dependency>
+  <groupId>io.zeebe.bpmn-spec</groupId>
+  <artifactId>eze-test-runner</artifactId>
+  <version>${bpmn-spec.version}</version>
+  <scope>test</scope>
+</dependency>
+```    
+
+2) Write a JUnit test class like the one mentioned above and use this line to select
+   the `EzeTestRunner`:
+
+```
+private val specRunner = factory.create(testRunner = EzeTestRunner())
+```
+
+3) Follow the other steps as mentioned [above](#junit-integration-generic)
