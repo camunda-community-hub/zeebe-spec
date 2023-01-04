@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>io.zeebe.bpmn-spec</groupId>
@@ -15,18 +17,20 @@
     <artifactId>camunda-release-parent</artifactId>
     <version>3.9.1</version>
     <!-- do not remove empty tag - http://jira.codehaus.org/browse/MNG-4687 -->
-    <relativePath />
+    <relativePath/>
   </parent>
 
   <modules>
     <module>core</module>
     <module>zeebe-test-runner</module>
     <module>junit-extension</module>
+    <module>eze-test-runner</module>
   </modules>
 
   <properties>
     <kotlin.version>1.8.0</kotlin.version>
     <zeebe.version>8.1.5</zeebe.version>
+    <eze.version>1.1.0</eze.version>
 
     <junit.version>5.9.1</junit.version>
 
@@ -64,11 +68,23 @@
       </dependency>
 
       <dependency>
+        <groupId>io.zeebe.bpmn-spec</groupId>
+        <artifactId>eze-test-runner</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
         <groupId>io.camunda</groupId>
         <artifactId>zeebe-bom</artifactId>
         <version>${zeebe.version}</version>
         <scope>import</scope>
         <type>pom</type>
+      </dependency>
+
+      <dependency>
+        <groupId>org.camunda.community</groupId>
+        <artifactId>eze</artifactId>
+        <version>${eze.version}</version>
       </dependency>
 
       <dependency>
