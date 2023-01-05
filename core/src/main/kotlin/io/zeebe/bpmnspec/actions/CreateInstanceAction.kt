@@ -2,7 +2,8 @@ package io.zeebe.bpmnspec.actions
 
 import io.zeebe.bpmnspec.api.Action
 import io.zeebe.bpmnspec.api.TestContext
-import io.zeebe.bpmnspec.api.runner.TestRunner
+import io.zeebe.bpmnspec.runner.SpecActionExecutor
+import io.zeebe.bpmnspec.runner.SpecStateProvider
 
 class CreateInstanceAction(
     val bpmnProcessId: String,
@@ -10,8 +11,13 @@ class CreateInstanceAction(
     val processInstanceAlias: String?
 ) : Action {
 
-    override fun execute(runner: TestRunner, testContext: TestContext) {
-        val wfContext = runner.createProcessInstance(bpmnProcessId, variables)
+    override fun execute(
+        actionExecutor: SpecActionExecutor,
+        stateProvider: SpecStateProvider,
+        testContext: TestContext
+    ) {
+
+        val wfContext = actionExecutor.createProcessInstance(bpmnProcessId, variables)
 
         val alias = processInstanceAlias ?: bpmnProcessId
         testContext.storeContext(alias, wfContext)

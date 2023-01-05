@@ -1,10 +1,10 @@
 package io.zeebe.bpmnspec.verifications
 
+import io.zeebe.bpmnspec.ProcessInstanceKey
 import io.zeebe.bpmnspec.api.Verification
 import io.zeebe.bpmnspec.api.VerificationResult
-import io.zeebe.bpmnspec.api.ProcessInstanceContext
-import io.zeebe.bpmnspec.api.runner.TestRunner
-import io.zeebe.bpmnspec.api.runner.ProcessInstanceState
+import io.zeebe.bpmnspec.api.dto.ProcessInstanceState
+import io.zeebe.bpmnspec.runner.SpecStateProvider
 
 class ProcessInstanceStateVerification(
     val state: ProcessInstanceState,
@@ -12,14 +12,14 @@ class ProcessInstanceStateVerification(
 ) : Verification {
 
     override fun verify(
-        runner: TestRunner,
-        contexts: Map<String, ProcessInstanceContext>
+        stateProvider: SpecStateProvider,
+        contexts: Map<String, ProcessInstanceKey>
     ): VerificationResult {
 
         val context = processInstance?.let { contexts[processInstance] }
             ?: contexts.values.first()
 
-        val actualState = runner.getProcessInstanceState(context)
+        val actualState = stateProvider.getProcessInstanceState(context)
 
         return if (actualState == state) {
             VerificationResult(isFulfilled = true)

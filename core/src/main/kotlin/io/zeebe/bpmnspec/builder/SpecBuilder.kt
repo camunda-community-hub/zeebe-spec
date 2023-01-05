@@ -6,9 +6,9 @@ import io.zeebe.bpmnspec.api.Action
 import io.zeebe.bpmnspec.api.TestCase
 import io.zeebe.bpmnspec.api.TestSpec
 import io.zeebe.bpmnspec.api.Verification
-import io.zeebe.bpmnspec.api.runner.ElementInstanceState
-import io.zeebe.bpmnspec.api.runner.IncidentState
-import io.zeebe.bpmnspec.api.runner.ProcessInstanceState
+import io.zeebe.bpmnspec.api.dto.ElementInstanceState
+import io.zeebe.bpmnspec.api.dto.IncidentState
+import io.zeebe.bpmnspec.api.dto.ProcessInstanceState
 import io.zeebe.bpmnspec.verifications.*
 
 @DslMarker

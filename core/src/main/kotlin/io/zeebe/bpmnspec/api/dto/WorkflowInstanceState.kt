@@ -1,4 +1,4 @@
-package io.zeebe.bpmnspec.api.runner
+package io.zeebe.bpmnspec.api.dto
 
 enum class ProcessInstanceState {
     UNKNOWN,

@@ -1,9 +1,14 @@
 package io.zeebe.bpmnspec.api
 
-import io.zeebe.bpmnspec.api.runner.TestRunner
+import io.zeebe.bpmnspec.runner.SpecActionExecutor
+import io.zeebe.bpmnspec.runner.SpecStateProvider
 
 interface Action {
 
-    fun execute(runner: TestRunner, testContext: TestContext)
+    fun execute(
+        actionExecutor: SpecActionExecutor,
+        stateProvider: SpecStateProvider,
+        testContext: TestContext
+    )
 
 }
