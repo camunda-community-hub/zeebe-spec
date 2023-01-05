@@ -219,29 +219,34 @@ class EzeTestRunner(
     private fun getElementNameLookup(processInstanceKey: Long): (String) -> String? {
         val processDefinitionKey = environment.zeebeEngine
             .processInstanceRecords()
+            .events()
             .withProcessInstanceKey(processInstanceKey = processInstanceKey)
-            .first()
-            .value
-            .processDefinitionKey
+            .firstOrNull()
+            ?.value
+            ?.processDefinitionKey
+            ?: -1
 
         val processRecord = environment.zeebeEngine
             .processRecords()
             .withKey(key = processDefinitionKey)
-            .first()
-            .value
+            .firstOrNull()
+            ?.value
 
-        val bpmnXml = processRecord.resource
+        return processRecord
+            ?.let {
+                val bpmnXml = it.resource
+                val bpmnModelInstance = Bpmn.readModelFromStream(ByteArrayInputStream(bpmnXml))
 
-        val bpmnModelInstance = Bpmn.readModelFromStream(ByteArrayInputStream(bpmnXml))
-
-        return { elementId ->
-            if (elementId == processRecord.bpmnProcessId) {
-                processRecord.bpmnProcessId
-            } else {
-                bpmnModelInstance.getModelElementById<FlowElement>(elementId)
-                    ?.name
+                return { elementId ->
+                    if (elementId == it.bpmnProcessId) {
+                        it.bpmnProcessId
+                    } else {
+                        bpmnModelInstance.getModelElementById<FlowElement>(elementId)
+                            ?.name
+                    }
+                }
             }
-        }
+            ?: { _ -> null }
     }
 
     override fun getProcessInstanceVariables(context: ProcessInstanceContext): List<ProcessInstanceVariable> {
