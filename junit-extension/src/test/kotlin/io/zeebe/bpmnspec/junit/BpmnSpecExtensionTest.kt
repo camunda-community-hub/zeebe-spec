@@ -1,13 +1,11 @@
 package io.zeebe.bpmnspec.junit
 
-import io.zeebe.bpmnspec.runner.eze.EzeTestRunner
+import io.zeebe.bpmnspec.SpecRunner
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.params.ParameterizedTest
 
 @BpmnSpecRunner
-class BpmnSpecExtensionEzeTest(factory: SpecRunnerFactory) {
-
-    private val specRunner = factory.create(testRunner = EzeTestRunner())
+class BpmnSpecExtensionTest(private val specRunner: SpecRunner) {
 
     @ParameterizedTest
     @BpmnSpecSource(specResources = ["exclusive-gateway-spec.yaml", "boundary-event-spec.yaml"])
