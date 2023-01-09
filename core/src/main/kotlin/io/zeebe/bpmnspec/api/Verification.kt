@@ -1,9 +1,13 @@
 package io.zeebe.bpmnspec.api
 
-import io.zeebe.bpmnspec.api.runner.TestRunner
+import io.zeebe.bpmnspec.ProcessInstanceKey
+import io.zeebe.bpmnspec.runner.SpecStateProvider
 
 interface Verification {
 
-    fun verify(runner: TestRunner, contexts: Map<String, ProcessInstanceContext>): VerificationResult
+    fun verify(
+        stateProvider: SpecStateProvider,
+        contexts: Map<String, ProcessInstanceKey>
+    ): VerificationResult
 
 }

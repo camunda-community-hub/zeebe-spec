@@ -1,10 +1,10 @@
 package io.zeebe.bpmnspec.verifications
 
+import io.zeebe.bpmnspec.ProcessInstanceKey
 import io.zeebe.bpmnspec.api.Verification
 import io.zeebe.bpmnspec.api.VerificationResult
-import io.zeebe.bpmnspec.api.ProcessInstanceContext
-import io.zeebe.bpmnspec.api.runner.IncidentState
-import io.zeebe.bpmnspec.api.runner.TestRunner
+import io.zeebe.bpmnspec.api.dto.IncidentState
+import io.zeebe.bpmnspec.runner.SpecStateProvider
 
 class IncidentStateVerification(
     val state: IncidentState,
@@ -16,14 +16,14 @@ class IncidentStateVerification(
 ) : Verification {
 
     override fun verify(
-        runner: TestRunner,
-        contexts: Map<String, ProcessInstanceContext>
+        stateProvider: SpecStateProvider,
+        contexts: Map<String, ProcessInstanceKey>
     ): VerificationResult {
 
         val context = processInstance?.let { contexts[processInstance] }
             ?: contexts.values.first()
 
-        val actualIncident = runner.getIncidents(context)
+        val actualIncident = stateProvider.getIncidents(context)
             .filter { it.errorType == errorType }
             .filter { incident ->
                 elementId?.let { it == incident.elementId } ?: true

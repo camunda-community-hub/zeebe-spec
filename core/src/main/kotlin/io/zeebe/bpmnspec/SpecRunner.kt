@@ -1,8 +1,11 @@
 package io.zeebe.bpmnspec
 
 import io.zeebe.bpmnspec.api.*
-import io.zeebe.bpmnspec.api.runner.TestRunner
 import io.zeebe.bpmnspec.format.SpecDeserializer
+import io.zeebe.bpmnspec.runner.SpecActionExecutor
+import io.zeebe.bpmnspec.runner.SpecStateProvider
+import io.zeebe.bpmnspec.runner.TestRunnerEnvironment
+import io.zeebe.bpmnspec.runner.eze.EzeEnvironment
 import org.slf4j.LoggerFactory
 import java.io.InputStream
 import java.nio.file.Path
@@ -10,7 +13,9 @@ import java.time.Duration
 import java.time.Instant
 
 class SpecRunner(
-    private val testRunner: TestRunner,
+    private val environment: TestRunnerEnvironment = EzeEnvironment(),
+    private val beforeEachCallback: (SpecTestRunnerContext) -> Unit = {},
+    private val afterEachCallback: (SpecTestRunnerContext) -> Unit = {},
     private val resourceResolver: ResourceResolver = DirectoryResourceResolver(
         rootDirectory = Path.of(
             "."
@@ -24,17 +29,19 @@ class SpecRunner(
 
     private val specDeserializer = SpecDeserializer()
 
+    private val actionExecutor: SpecActionExecutor = environment.actionExecutor
+    private val stateProvider: SpecStateProvider = environment.stateProvider
+
     fun runSpec(input: InputStream): TestSpecResult {
 
-        logger.trace("Reading the spec")
+        logger.trace("Read the spec")
         val spec = specDeserializer.readSpec(input)
 
         return runSpec(spec)
     }
 
     fun runSpec(spec: TestSpec): TestSpecResult {
-        logger.debug("Running {} tests", spec.testCases.size)
-        testRunner.beforeAll()
+        logger.debug("Run {} tests", spec.testCases.size)
 
         val testResults = spec.testCases.map {
             runTestCase(
@@ -42,8 +49,6 @@ class SpecRunner(
                 testcase = it
             )
         }
-
-        testRunner.afterAll()
 
         logger.debug(
             "All tests finished [{}/{} passed]",
@@ -58,7 +63,7 @@ class SpecRunner(
     }
 
     fun runSingleTestCase(resources: List<String>, testcase: TestCase): TestResult {
-        logger.debug("Running a single test")
+        logger.debug("Run a single test")
 
         val testResult = runTestCase(
             resources = resources,
@@ -69,17 +74,22 @@ class SpecRunner(
     }
 
     private fun runTestCase(resources: List<String>, testcase: TestCase): TestResult {
-        logger.debug("Preparing the test [name: '{}']", testcase.name)
-        testRunner.beforeEach()
+        logger.debug("Prepare the test [name: '{}']", testcase.name)
+
+        logger.debug("Create spec test environment")
+        environment.create()
+
+        logger.debug("Invoke before-each callback")
+        beforeEachCallback(environment.getContext())
 
         logger.debug(
-            "Deploying resources for the test. [name: '{}', resources: {}]",
+            "Deploy resources for the test. [name: '{}', resources: {}]",
             testcase.name,
             resources.joinToString()
         )
         resources.forEach { resourceName ->
             val resourceStream = resourceResolver.getResource(resourceName)
-            testRunner.deployProcess(resourceName, resourceStream)
+            actionExecutor.deployProcess(resourceName, resourceStream)
         }
 
         logger.debug(
@@ -96,14 +106,18 @@ class SpecRunner(
             result.message
         )
 
-        testRunner.afterEach()
+        logger.debug("Invoke after-each callback")
+        afterEachCallback(environment.getContext())
+
+        logger.debug("Close spec test environment")
+        environment.close()
 
         return result
     }
 
     private fun runTestCase(testcase: TestCase): TestResult {
 
-        val contexts = mutableMapOf<String, ProcessInstanceContext>()
+        val contexts = mutableMapOf<String, ProcessInstanceKey>()
 
         // TODO (saig0): handle case when the context is not found
         val testContext = TestContext(
@@ -113,11 +127,16 @@ class SpecRunner(
             verificationRetryInterval = verificationRetryInterval
         )
 
-        testcase.actions.forEach { it.execute(testRunner, testContext) }
+        testcase.actions.forEach { it.execute(actionExecutor, stateProvider, testContext) }
 
         if (contexts.isEmpty()) {
-            testRunner.getProcessInstanceContexts()
-                .mapIndexed { index, wfContext -> contexts.put("process-$index", wfContext) }
+            stateProvider.getProcessInstanceKeys()
+                .mapIndexed { index, processInstanceKey ->
+                    contexts.put(
+                        "process-$index",
+                        processInstanceKey
+                    )
+                }
         }
 
         val start = Instant.now()
@@ -128,7 +147,7 @@ class SpecRunner(
 
             var result: VerificationResult
             do {
-                result = verification.verify(testRunner, contexts)
+                result = verification.verify(stateProvider, contexts)
 
                 val shouldRetry = !result.isFulfilled &&
                         Duration.between(start, Instant.now()).minus(verificationTimeout).isNegative
@@ -162,13 +181,13 @@ class SpecRunner(
     }
 
     private fun collectTestOutput(): List<TestOutput> {
-        return testRunner.getProcessInstanceContexts().map { context ->
+        return stateProvider.getProcessInstanceKeys().map { processInstanceKey ->
             TestOutput(
-                context = context,
-                state = testRunner.getProcessInstanceState(context),
-                elementInstances = testRunner.getElementInstances(context),
-                variables = testRunner.getProcessInstanceVariables(context),
-                incidents = testRunner.getIncidents(context)
+                processInstanceKey = processInstanceKey,
+                state = stateProvider.getProcessInstanceState(processInstanceKey),
+                elementInstances = stateProvider.getElementInstances(processInstanceKey),
+                variables = stateProvider.getProcessInstanceVariables(processInstanceKey),
+                incidents = stateProvider.getIncidents(processInstanceKey)
             )
         }
     }
