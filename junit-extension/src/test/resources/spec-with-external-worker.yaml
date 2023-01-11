@@ -1,0 +1,31 @@
+resources:
+  - exclusive-gateway.bpmn
+
+testCases:
+  - name: activate task B
+    description: the external job worker should complete task A with 'x' > 5
+    actions:
+      - action: create-instance
+        args:
+          bpmn_process_id: exclusive-gateway
+          variables: '{"x":5}'
+
+    verifications:
+      - verification: element-instance-state
+        args:
+          element_name: B
+          state: activated
+
+  - name: activate task C
+    description: the external job worker should complete task A with 'x' <= 5
+    actions:
+      - action: create-instance
+        args:
+          bpmn_process_id: exclusive-gateway
+          variables: '{"x":3}'
+
+    verifications:
+      - verification: element-instance-state
+        args:
+          element_name: C
+          state: activated

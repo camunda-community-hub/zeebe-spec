@@ -2,7 +2,11 @@ package io.zeebe.bpmnspec.junit
 
 import io.zeebe.bpmnspec.ClasspathResourceResolver
 import io.zeebe.bpmnspec.SpecRunner
+import io.zeebe.bpmnspec.api.SpecTestRunnerContext
+import io.zeebe.bpmnspec.runner.TestRunnerEnvironment
+import io.zeebe.bpmnspec.runner.eze.EzeEnvironment
 import org.junit.jupiter.api.extension.ExtensionContext
+import org.junit.jupiter.api.extension.ExtensionContext.Namespace
 import org.junit.jupiter.api.extension.ParameterContext
 import org.junit.jupiter.api.extension.ParameterResolver
 import java.time.Duration
@@ -57,10 +61,32 @@ class SpecRunnerProvider : ParameterResolver {
             ?.orElse(defaultVerificationRetryInterval)
             ?: defaultVerificationRetryInterval
 
+        val environment: TestRunnerEnvironment = EzeEnvironment()
+
+        // the context is used for injecting the Zeebe client
+        storeTestRunnerContext(extensionContext, environment.getContext())
+
         return SpecRunner(
             resourceResolver = resourceResolver,
+            environment = environment,
             verificationTimeout = verificationTimeout,
             verificationRetryInterval = verificationRetryInterval
         )
     }
+
+    private fun storeTestRunnerContext(
+        extensionContext: ExtensionContext?,
+        specTestRunnerContext: SpecTestRunnerContext
+    ) {
+        extensionContext
+            ?.getStore(extensionContextNamespace)
+            ?.put(extensionContextStoreKey, specTestRunnerContext)
+    }
+
+    companion object {
+        val extensionContextNamespace: Namespace = Namespace.create(SpecRunnerProvider::class.java)
+
+        const val extensionContextStoreKey = "spec-runner-environment"
+    }
+
 }
