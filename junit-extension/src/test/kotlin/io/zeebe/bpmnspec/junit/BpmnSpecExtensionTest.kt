@@ -1,7 +1,7 @@
 package io.zeebe.bpmnspec.junit
 
 import io.zeebe.bpmnspec.SpecRunner
-import org.assertj.core.api.Assertions.assertThat
+import io.zeebe.bpmnspec.assertj.SpecAssertions.assertThat
 import org.junit.jupiter.params.ParameterizedTest
 
 @BpmnSpecRunner
@@ -14,9 +14,7 @@ class BpmnSpecExtensionTest(private val specRunner: SpecRunner) {
         val testResult =
             specRunner.runSingleTestCase(resources = spec.resources, testcase = spec.testCase)
 
-        assertThat(testResult.success)
-            .describedAs(testResult.message)
-            .isTrue()
+        assertThat(testResult).isSuccessful()
     }
 
 }
