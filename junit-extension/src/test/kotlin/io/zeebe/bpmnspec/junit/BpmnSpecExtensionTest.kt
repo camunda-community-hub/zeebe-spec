@@ -17,4 +17,14 @@ class BpmnSpecExtensionTest(private val specRunner: SpecRunner) {
         assertThat(testResult).isSuccessful()
     }
 
+    @ParameterizedTest
+    @BpmnSpecSource(specDirectory = "specs")
+    fun `should run all specs in directory`(spec: BpmnSpecTestCase) {
+
+        val testResult =
+            specRunner.runSingleTestCase(resources = spec.resources, testcase = spec.testCase)
+
+        assertThat(testResult).isSuccessful()
+    }
+
 }
