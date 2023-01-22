@@ -63,8 +63,9 @@ class TestCaseBuilder(private val name: String, private val description: String?
         verifications.addAll(verificationsBuilder.build())
     }
 
+    // TODO (saig0): instructions can be any order!
     fun build(): TestCase {
-        return TestCase(name, description, actions, verifications)
+        return TestCase(name, description, actions + verifications)
     }
 }
 

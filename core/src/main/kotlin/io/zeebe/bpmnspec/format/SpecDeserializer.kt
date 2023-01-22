@@ -13,9 +13,10 @@ import java.io.InputStream
 
 class SpecDeserializer {
 
-    fun readSpec(input: InputStream): io.zeebe.bpmnspec.api.TestSpec {
+    private val kotlinModule = KotlinModule.Builder().build()
+    private val objectMapper = ObjectMapper(YAMLFactory()).registerModule(kotlinModule)
 
-        val objectMapper = ObjectMapper(YAMLFactory()).registerModule(KotlinModule())
+    fun readSpec(input: InputStream): io.zeebe.bpmnspec.api.TestSpec {
 
         val spec = objectMapper.readValue<TestSpec>(input)
 
@@ -26,16 +27,31 @@ class SpecDeserializer {
     }
 
     private fun transformTestCase(testCase: TestCase): io.zeebe.bpmnspec.api.TestCase {
+        val instructions = testCase.instructions
+            ?.map { transformInstruction(it) }
+            ?: testCase.let {
+                val instructions = mutableListOf<io.zeebe.bpmnspec.api.Instruction>()
+                instructions += it.actions?.map { transformAction(it) } ?: emptyList()
+                instructions += it.verifications?.map { transformVerification(it) } ?: emptyList()
+                instructions
+            }
+
         return io.zeebe.bpmnspec.api.TestCase(
             name = testCase.name,
-            description = testCase.description,
-            actions = testCase.actions.map(this::transformAction),
-            verifications = testCase.verifications.map(this::transformVerification)
+            description = testCase.description ?: "",
+            instructions = instructions
         )
     }
 
+    private fun transformInstruction(instruction: Instruction): io.zeebe.bpmnspec.api.Instruction {
+        return when (instruction.type()) {
+            Instruction.InstructionType.ACTION -> transformAction(instruction.toAction())
+            Instruction.InstructionType.VERIFICATION -> transformVerification(instruction.toVerification())
+        }
+    }
+
     private fun transformAction(action: Action): io.zeebe.bpmnspec.api.Action {
-        val name = action.action.toLowerCase()
+        val name = action.action.lowercase()
         val args = action.args ?: emptyMap()
 
         return when (name) {
@@ -73,7 +89,7 @@ class SpecDeserializer {
             )
 
             "await-element-instance-state" -> AwaitElementInstanceStateAction(
-                state = args["state"]?.let { ElementInstanceState.valueOf(it.toUpperCase()) }
+                state = args["state"]?.let { ElementInstanceState.valueOf(it.uppercase()) }
                     ?: throw RuntimeException("Missing required parameter 'state' for action 'await-element-instance-state'"),
                 elementId = args["element_id"],
                 elementName = args["element_name"],
@@ -85,18 +101,18 @@ class SpecDeserializer {
     }
 
     private fun transformVerification(verification: Verification): io.zeebe.bpmnspec.api.Verification {
-        val name = verification.verification.toLowerCase()
-        val args = verification.args
+        val name = verification.verification.lowercase()
+        val args = verification.args ?: emptyMap()
 
         return when (name) {
             "process-instance-state" -> ProcessInstanceStateVerification(
-                state = args["state"]?.let { ProcessInstanceState.valueOf(it.toUpperCase()) }
+                state = args["state"]?.let { ProcessInstanceState.valueOf(it.uppercase()) }
                     ?: throw RuntimeException("Missing required parameter 'state' for verification 'process-instance-state'"),
                 processInstance = args["process_instance"]
             )
 
             "element-instance-state" -> ElementInstanceStateVerification(
-                state = args["state"]?.let { ElementInstanceState.valueOf(it.toUpperCase()) }
+                state = args["state"]?.let { ElementInstanceState.valueOf(it.uppercase()) }
                     ?: throw RuntimeException("Missing required parameter 'state' for verification 'element-instance-state'"),
                 elementId = args["element_id"],
                 elementName = args["element_name"],
@@ -122,7 +138,7 @@ class SpecDeserializer {
             )
 
             "incident-state" -> IncidentStateVerification(
-                state = args["state"]?.let { IncidentState.valueOf(it.toUpperCase()) }
+                state = args["state"]?.let { IncidentState.valueOf(it.uppercase()) }
                     ?: throw RuntimeException("Missing required parameter 'state' for verification 'incident-state'"),
                 errorType = args["error_type"]
                     ?: throw RuntimeException("Missing required parameter 'errorType' for verification 'incident-state'"),

@@ -127,7 +127,9 @@ class SpecRunner(
             verificationRetryInterval = verificationRetryInterval
         )
 
-        testcase.actions.forEach { it.execute(actionExecutor, stateProvider, testContext) }
+        // TODO (saig0): instructions can be any order!
+        testcase.instructions.filterIsInstance(Action::class.java)
+            .forEach { it.execute(actionExecutor, stateProvider, testContext) }
 
         if (contexts.isEmpty()) {
             stateProvider.getProcessInstanceKeys()
@@ -143,7 +145,8 @@ class SpecRunner(
 
         val successfulVerifications = mutableListOf<Verification>()
 
-        for (verification in testcase.verifications) {
+        // TODO (saig0): instructions can be any order!
+        for (verification in testcase.instructions.filterIsInstance(Verification::class.java)) {
 
             var result: VerificationResult
             do {

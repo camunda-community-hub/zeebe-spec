@@ -1,0 +1,24 @@
+resources:
+  - demo.bpmn
+
+testCases:
+  - name: complete process
+    description: Use instructions
+
+    instructions:
+      - action: create-instance
+        args:
+          bpmn_process_id: demo
+      - action: complete-task
+        args:
+          job_type: a
+      - action: complete-task
+        args:
+          job_type: b
+      - action: complete-task
+        args:
+          job_type: c
+      - verification: process-instance-state
+        args:
+          state: completed
+
