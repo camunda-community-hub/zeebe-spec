@@ -25,7 +25,7 @@
   </modules>
 
   <properties>
-    <kotlin.version>1.8.0</kotlin.version>
+    <kotlin.version>1.8.10</kotlin.version>
     <eze.version>1.1.0</eze.version>
 
     <junit.version>5.9.2</junit.version>
