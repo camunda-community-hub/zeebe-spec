@@ -1,10 +1,8 @@
-resources:
-  - exclusive-gateway.bpmn
-
 testCases:
   - name: condition-flow
     description: the condition is fulfilled
-    actions:
+
+    instructions:
       - action: create-instance
         args:
           bpmn_process_id: exclusive-gateway
@@ -13,7 +11,6 @@ testCases:
           job_type: a
           variables: '{"x":8}'
 
-    verifications:
       - verification: element-instance-state
         args:
           element_name: B
@@ -21,7 +18,8 @@ testCases:
 
   - name: default-flow
     description: take the default flow
-    actions:
+
+    instructions:
       - action: create-instance
         args:
           bpmn_process_id: exclusive-gateway
@@ -30,7 +28,6 @@ testCases:
           job_type: a
           variables: '{"x":3}'
 
-    verifications:
       - verification: element-instance-state
         args:
           element_name: C

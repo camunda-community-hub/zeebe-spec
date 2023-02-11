@@ -22,8 +22,6 @@ class SpecBuilderTest {
     fun `should run Kotlin spec (instructions-style)`() {
         // given
         val spec = testSpec {
-            resources("demo.bpmn")
-
             testCase(name = "complete process", description = "demo test case") {
 
                 createInstance(bpmnProcessId = "demo")
@@ -54,8 +52,6 @@ class SpecBuilderTest {
     fun `should run Kotlin spec (actions-verifications-style)`() {
         // given
         val spec = testSpec {
-            resources("demo.bpmn")
-
             testCase(name = "complete process", description = "demo test case") {
                 actions {
                     createInstance(bpmnProcessId = "demo")

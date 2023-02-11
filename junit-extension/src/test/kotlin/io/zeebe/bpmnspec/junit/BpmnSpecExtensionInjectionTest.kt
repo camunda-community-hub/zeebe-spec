@@ -36,7 +36,7 @@ class BpmnSpecExtensionInjectionTest(private val specRunner: SpecRunner) {
             .isNotNull()
 
         val testResult =
-            specRunner.runSingleTestCase(resources = spec.resources, testcase = spec.testCase)
+            specRunner.runSingleTestCase(testcase = spec.testCase)
 
         assertThat(testResult.success)
             .describedAs(testResult.message)

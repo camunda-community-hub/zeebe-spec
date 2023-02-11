@@ -1,9 +1,7 @@
-resources:
-  - demo.bpmn
-
 testCases:
   - name: fail-verification
-    actions:
+
+    instructions:
       - action: create-instance
         args:
           bpmn_process_id: demo
@@ -11,7 +9,6 @@ testCases:
         args:
           job_type: a
 
-    verifications:
       - verification: element-instance-state
         args:
           element_name: A

@@ -12,7 +12,7 @@ class BpmnSpecExtensionTest(private val specRunner: SpecRunner) {
     fun `should pass the BPMN spec`(spec: BpmnSpecTestCase) {
 
         val testResult =
-            specRunner.runSingleTestCase(resources = spec.resources, testcase = spec.testCase)
+            specRunner.runSingleTestCase(testcase = spec.testCase)
 
         assertThat(testResult).isSuccessful()
     }
@@ -22,7 +22,7 @@ class BpmnSpecExtensionTest(private val specRunner: SpecRunner) {
     fun `should run all specs in directory`(spec: BpmnSpecTestCase) {
 
         val testResult =
-            specRunner.runSingleTestCase(resources = spec.resources, testcase = spec.testCase)
+            specRunner.runSingleTestCase(testcase = spec.testCase)
 
         assertThat(testResult).isSuccessful()
     }

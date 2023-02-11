@@ -1,16 +1,12 @@
-resources:
-  - demo.bpmn
-
 testCases:
   - name: spec 1 - case 1
     description: should activate task A
 
-    actions:
+    instructions:
       - action: create-instance
         args:
           bpmn_process_id: demo
 
-    verifications:
       - verification: element-instance-state
         args:
           element_name: A
@@ -19,7 +15,7 @@ testCases:
   - name: spec 1 - case 2
     description: should complete task A
 
-    actions:
+    instructions:
       - action: create-instance
         args:
           bpmn_process_id: demo
@@ -27,7 +23,6 @@ testCases:
         args:
           job_type: a
 
-    verifications:
       - verification: element-instance-state
         args:
           element_name: A
