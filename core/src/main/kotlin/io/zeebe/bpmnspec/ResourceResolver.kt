@@ -1,8 +1,8 @@
 package io.zeebe.bpmnspec
 
-import java.io.InputStream
+import java.io.File
 
 interface ResourceResolver {
 
-    fun getResource(resourceName: String): InputStream
+    fun getResources(): List<File>
 }
