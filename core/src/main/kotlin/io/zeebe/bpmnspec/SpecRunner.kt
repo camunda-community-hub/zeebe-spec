@@ -7,6 +7,7 @@ import io.zeebe.bpmnspec.runner.SpecStateProvider
 import io.zeebe.bpmnspec.runner.TestRunnerEnvironment
 import io.zeebe.bpmnspec.runner.eze.EzeEnvironment
 import org.slf4j.LoggerFactory
+import java.io.FileInputStream
 import java.io.InputStream
 import java.nio.file.Path
 import java.time.Duration
@@ -82,13 +83,21 @@ class SpecRunner(
         logger.debug("Invoke before-each callback")
         beforeEachCallback(environment.getContext())
 
-        logger.debug(
-            "Deploy resources for the test. [name: '{}', resources: {}]",
-            testcase.name,
-            resources.joinToString()
-        )
-        resources.forEach { resourceName ->
-            val resourceStream = resourceResolver.getResource(resourceName)
+        resourceResolver.getResources()
+            .map { it.name }
+            .joinToString()
+            .let {
+                logger.debug(
+                    "Deploy resource for the test. [name: '{}', resources: {}]",
+                    testcase.name,
+                    it
+                )
+            }
+
+        resourceResolver.getResources().forEach { resource ->
+            val resourceName = resource.name
+            val resourceStream = FileInputStream(resource)
+
             actionExecutor.deployProcess(resourceName, resourceStream)
         }
 
@@ -140,7 +149,7 @@ class SpecRunner(
                 is Verification -> {
 
                     val result = verifyInstruction(instruction, contexts)
-                    
+
                     if (result.isFulfilled) {
                         successfulVerifications.add(instruction)
                     } else {
