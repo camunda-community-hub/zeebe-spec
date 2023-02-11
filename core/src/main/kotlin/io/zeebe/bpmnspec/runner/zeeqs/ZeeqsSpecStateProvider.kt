@@ -71,6 +71,5 @@ class ZeeqsSpecStateProvider(
     }
 
     override fun close() {
-        TODO("Not yet implemented")
     }
 }
