@@ -1,6 +1,3 @@
-resources:
-  - demo.bpmn
-
 testCases:
   - name: complete process
     description: Use instructions

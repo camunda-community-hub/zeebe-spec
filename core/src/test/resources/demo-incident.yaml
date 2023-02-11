@@ -1,10 +1,7 @@
-resources:
-  - demo2.bpmn
-
 testCases:
   - name: publish message
 
-    actions:
+    instructions:
       - action: create-instance
         args:
           bpmn_process_id: demo2
@@ -15,7 +12,6 @@ testCases:
         args:
           job_type: c
 
-    verifications:
       - verification: process-instance-state
         args:
           state: activated

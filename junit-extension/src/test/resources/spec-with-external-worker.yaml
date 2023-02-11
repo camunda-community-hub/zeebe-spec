@@ -1,16 +1,13 @@
-resources:
-  - external-worker-test.bpmn
-
 testCases:
   - name: complete task
     description: the external job worker should complete task
-    actions:
+
+    instructions:
       - action: create-instance
         args:
           bpmn_process_id: external-worker-test
           variables: '{"x":5}'
 
-    verifications:
       - verification: element-instance-state
         args:
           element_name: external-worker

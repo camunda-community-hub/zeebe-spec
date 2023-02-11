@@ -44,12 +44,7 @@ class SpecRunner(
     fun runSpec(spec: TestSpec): TestSpecResult {
         logger.debug("Run {} tests", spec.testCases.size)
 
-        val testResults = spec.testCases.map {
-            runTestCase(
-                resources = spec.resources,
-                testcase = it
-            )
-        }
+        val testResults = spec.testCases.map { runTestCase(testcase = it) }
 
         logger.debug(
             "All tests finished [{}/{} passed]",
@@ -63,18 +58,13 @@ class SpecRunner(
         )
     }
 
-    fun runSingleTestCase(resources: List<String>, testcase: TestCase): TestResult {
+    fun runSingleTestCase(testcase: TestCase): TestResult {
         logger.debug("Run a single test")
 
-        val testResult = runTestCase(
-            resources = resources,
-            testcase = testcase
-        )
-
-        return testResult
+        return runTestCase(testcase = testcase)
     }
 
-    private fun runTestCase(resources: List<String>, testcase: TestCase): TestResult {
+    private fun runTestCase(testcase: TestCase): TestResult {
         logger.debug("Prepare the test [name: '{}']", testcase.name)
 
         logger.debug("Create spec test environment")
@@ -106,7 +96,7 @@ class SpecRunner(
             testcase.name,
             testcase.description
         )
-        val result = runTestCase(testcase)
+        val result = executeTestCase(testcase)
 
         logger.debug(
             "Test finished [name: '{}', success: '{}', message: '{}']",
@@ -124,7 +114,7 @@ class SpecRunner(
         return result
     }
 
-    private fun runTestCase(testcase: TestCase): TestResult {
+    private fun executeTestCase(testcase: TestCase): TestResult {
 
         val contexts = mutableMapOf<String, ProcessInstanceKey>()
 

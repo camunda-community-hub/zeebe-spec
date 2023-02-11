@@ -1,11 +1,8 @@
-resources:
-  - demo.bpmn
-
 testCases:
   - name: complete process
     description: demo test case
 
-    actions:
+    instructions:
       - action: create-instance
         args:
           bpmn_process_id: demo
@@ -29,7 +26,6 @@ testCases:
           job_type: c
           variables: '{}'
 
-    verifications:
       - verification: process-instance-state
         args:
           state: completed

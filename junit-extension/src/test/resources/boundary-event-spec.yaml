@@ -1,11 +1,8 @@
-resources:
-  - message-boundary-event.bpmn
-
 testCases:
   - name: interrupt-task
     description: trigger the message event and interrupt the task
 
-    actions:
+    instructions:
       - action: create-instance
         args:
           bpmn_process_id: message-boundary-event
@@ -20,7 +17,6 @@ testCases:
           correlation_key: key-1
           variables: '{"x":1}'
 
-    verifications:
       - verification: element-instance-state
         args:
           element_name: A

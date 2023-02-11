@@ -19,11 +19,11 @@ fun testSpec(init: TestSpecBuilder.() -> Unit): TestSpec {
 
 @TestSpecMarker
 class TestSpecBuilder {
-    private val resources = mutableListOf<String>()
     private val testCases = mutableListOf<TestCase>();
 
+    @Deprecated("All resources are deployed by default. Explicit resources are not required anymore.")
     fun resources(vararg resources: String) {
-        this.resources.addAll(resources)
+        // explicit resources are not used anymore
     }
 
     fun testCase(name: String, description: String? = null, init: TestCaseBuilder.() -> Unit) {
@@ -35,7 +35,7 @@ class TestSpecBuilder {
     }
 
     fun build(): TestSpec {
-        return TestSpec(resources, testCases);
+        return TestSpec(testCases);
     }
 }
 

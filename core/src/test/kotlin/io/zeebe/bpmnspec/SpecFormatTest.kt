@@ -11,16 +11,13 @@ import org.junit.jupiter.api.Test
 class SpecFormatTest {
 
     @Test
-    fun `should deserialize spec with actions and verifications`() {
+    fun `should deserialize spec (actions-verifications-style)`() {
 
         val deserializer = SpecDeserializer()
 
-        val input = SpecFormatTest::class.java.getResourceAsStream("/demo.yaml")
+        val input =
+            SpecFormatTest::class.java.getResourceAsStream("/demo-actions-verifications-style.yaml")
         val spec = deserializer.readSpec(input)
-
-        assertThat(spec.resources)
-            .hasSize(1)
-            .contains("demo.bpmn")
 
         assertThat(spec.testCases).hasSize(1)
 
@@ -37,11 +34,11 @@ class SpecFormatTest {
     }
 
     @Test
-    fun `should deserialize spec with instructions`() {
+    fun `should deserialize spec (instructions-style)`() {
 
         val deserializer = SpecDeserializer()
 
-        val input = SpecFormatTest::class.java.getResourceAsStream("/spec-with-instructions.yaml")
+        val input = SpecFormatTest::class.java.getResourceAsStream("/spec-instructions-style.yaml")
         val spec = deserializer.readSpec(input)
 
         assertThat(spec.testCases).hasSize(1)

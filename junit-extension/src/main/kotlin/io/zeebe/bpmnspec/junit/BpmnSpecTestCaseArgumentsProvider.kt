@@ -35,7 +35,6 @@ class BpmnSpecTestCaseArgumentsProvider : ArgumentsProvider, AnnotationConsumer<
             .flatMap { spec ->
                 spec.testCases.map {
                     BpmnSpecTestCase(
-                        resources = spec.resources,
                         testCase = it
                     )
                 }

@@ -21,7 +21,6 @@ class SpecDeserializer {
         val spec = objectMapper.readValue<TestSpec>(input)
 
         return io.zeebe.bpmnspec.api.TestSpec(
-            resources = spec.resources,
             testCases = spec.testCases.map(this::transformTestCase)
         )
     }

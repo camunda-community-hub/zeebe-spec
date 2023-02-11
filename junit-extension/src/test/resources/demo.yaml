@@ -1,11 +1,8 @@
-resources:
-  - demo.bpmn
-
 testCases:
   - name: complete process
     description: should work
 
-    actions:
+    instructions:
       - action: create-instance
         args:
           bpmn_process_id: demo
@@ -19,7 +16,6 @@ testCases:
         args:
           job_type: c
 
-    verifications:
       - verification: process-instance-state
         args:
           state: completed
@@ -27,7 +23,7 @@ testCases:
   - name: has variable from task
     description: should fail
 
-    actions:
+    instructions:
       - action: create-instance
         args:
           bpmn_process_id: demo
@@ -42,7 +38,6 @@ testCases:
         args:
           job_type: c
 
-    verifications:
       - verification: process-instance-variable
         args:
           name: x
