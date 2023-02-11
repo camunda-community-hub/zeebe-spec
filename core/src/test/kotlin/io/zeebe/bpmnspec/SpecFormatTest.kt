@@ -3,6 +3,7 @@ package io.zeebe.bpmnspec
 import io.zeebe.bpmnspec.actions.CompleteTaskAction
 import io.zeebe.bpmnspec.actions.CreateInstanceAction
 import io.zeebe.bpmnspec.format.SpecDeserializer
+import io.zeebe.bpmnspec.verifications.ElementInstanceStateVerification
 import io.zeebe.bpmnspec.verifications.ProcessInstanceStateVerification
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -49,12 +50,11 @@ class SpecFormatTest {
         assertThat(testCase.name).isEqualTo("complete process")
         assertThat(testCase.description).isEqualTo("Use instructions")
 
-        assertThat(testCase.instructions).hasSize(5)
+        assertThat(testCase.instructions).hasSize(4)
         assertThat(testCase.instructions[0]).isInstanceOf(CreateInstanceAction::class.java)
-        assertThat(testCase.instructions[1]).isInstanceOf(CompleteTaskAction::class.java)
+        assertThat(testCase.instructions[1]).isInstanceOf(ElementInstanceStateVerification::class.java)
         assertThat(testCase.instructions[2]).isInstanceOf(CompleteTaskAction::class.java)
-        assertThat(testCase.instructions[3]).isInstanceOf(CompleteTaskAction::class.java)
-        assertThat(testCase.instructions[4]).isInstanceOf(ProcessInstanceStateVerification::class.java)
+        assertThat(testCase.instructions[3]).isInstanceOf(ElementInstanceStateVerification::class.java)
     }
 
 }

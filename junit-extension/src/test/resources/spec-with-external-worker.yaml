@@ -1,31 +1,26 @@
 resources:
-  - exclusive-gateway.bpmn
+  - external-worker-test.bpmn
 
 testCases:
-  - name: activate task B
-    description: the external job worker should complete task A with 'x' > 5
+  - name: complete task
+    description: the external job worker should complete task
     actions:
       - action: create-instance
         args:
-          bpmn_process_id: exclusive-gateway
+          bpmn_process_id: external-worker-test
           variables: '{"x":5}'
 
     verifications:
       - verification: element-instance-state
         args:
-          element_name: B
-          state: activated
+          element_name: external-worker
+          state: completed
 
-  - name: activate task C
-    description: the external job worker should complete task A with 'x' <= 5
-    actions:
-      - action: create-instance
+      - verification: process-instance-variable
         args:
-          bpmn_process_id: exclusive-gateway
-          variables: '{"x":3}'
+          name: x
+          value: '6'
 
-    verifications:
-      - verification: element-instance-state
+      - verification: process-instance-state
         args:
-          element_name: C
-          state: activated
+          state: completed

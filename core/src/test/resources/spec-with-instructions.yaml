@@ -9,16 +9,18 @@ testCases:
       - action: create-instance
         args:
           bpmn_process_id: demo
+
+      - verification: element-instance-state
+        args:
+          element_name: A
+          state: activated
+
       - action: complete-task
         args:
           job_type: a
-      - action: complete-task
+
+      - verification: element-instance-state
         args:
-          job_type: b
-      - action: complete-task
-        args:
-          job_type: c
-      - verification: process-instance-state
-        args:
+          element_name: A
           state: completed
 

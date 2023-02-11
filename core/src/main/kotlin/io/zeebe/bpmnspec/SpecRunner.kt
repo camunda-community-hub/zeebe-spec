@@ -127,50 +127,34 @@ class SpecRunner(
             verificationRetryInterval = verificationRetryInterval
         )
 
-        // TODO (saig0): instructions can be any order!
-        testcase.instructions.filterIsInstance(Action::class.java)
-            .forEach { it.execute(actionExecutor, stateProvider, testContext) }
-
-        if (contexts.isEmpty()) {
-            stateProvider.getProcessInstanceKeys()
-                .mapIndexed { index, processInstanceKey ->
-                    contexts.put(
-                        "process-$index",
-                        processInstanceKey
-                    )
-                }
-        }
-
-        val start = Instant.now()
-
         val successfulVerifications = mutableListOf<Verification>()
 
-        // TODO (saig0): instructions can be any order!
-        for (verification in testcase.instructions.filterIsInstance(Verification::class.java)) {
+        testcase.instructions.forEach { instruction ->
 
-            var result: VerificationResult
-            do {
-                result = verification.verify(stateProvider, contexts)
+            if (contexts.isEmpty()) {
+                loadContext(contexts)
+            }
 
-                val shouldRetry = !result.isFulfilled &&
-                        Duration.between(start, Instant.now()).minus(verificationTimeout).isNegative
+            when (instruction) {
+                is Action -> instruction.execute(actionExecutor, stateProvider, testContext)
+                is Verification -> {
 
-                if (shouldRetry) {
-                    Thread.sleep(verificationRetryInterval.toMillis())
+                    val result = verifyInstruction(instruction, contexts)
+                    
+                    if (result.isFulfilled) {
+                        successfulVerifications.add(instruction)
+                    } else {
+                        return TestResult(
+                            testCase = testcase,
+                            success = false,
+                            message = result.failureMessage,
+                            successfulVerifications = successfulVerifications.toList(),
+                            failedVerification = instruction,
+                            output = collectTestOutput()
+                        )
+                    }
+
                 }
-            } while (shouldRetry)
-
-            if (result.isFulfilled) {
-                successfulVerifications.add(verification)
-            } else {
-                return TestResult(
-                    testCase = testcase,
-                    success = false,
-                    message = result.failureMessage,
-                    successfulVerifications = successfulVerifications.toList(),
-                    failedVerification = verification,
-                    output = collectTestOutput()
-                )
             }
         }
 
@@ -181,6 +165,41 @@ class SpecRunner(
             successfulVerifications = successfulVerifications.toList(),
             output = collectTestOutput()
         )
+    }
+
+    private fun loadContext(contexts: MutableMap<String, ProcessInstanceKey>) {
+        stateProvider.getProcessInstanceKeys()
+            .mapIndexed { index, processInstanceKey ->
+                contexts.put(
+                    "process-$index",
+                    processInstanceKey
+                )
+            }
+    }
+
+    private fun verifyInstruction(
+        instruction: Verification,
+        contexts: Map<String, ProcessInstanceKey>
+    ): VerificationResult {
+        val start = Instant.now()
+
+        var result: VerificationResult
+        do {
+            result = instruction.verify(stateProvider, contexts)
+
+            if (result.isFulfilled) {
+                return result
+            }
+
+            val shouldRetry =
+                Duration.between(start, Instant.now()).minus(verificationTimeout).isNegative
+
+            if (shouldRetry) {
+                Thread.sleep(verificationRetryInterval.toMillis())
+            }
+        } while (shouldRetry)
+
+        return result
     }
 
     private fun collectTestOutput(): List<TestOutput> {
