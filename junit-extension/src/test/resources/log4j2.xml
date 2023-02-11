@@ -9,9 +9,9 @@
     </Console>
   </Appenders>
   <Loggers>
-    <Logger name="io.zeebe.bpmnspec" level="trace"/>
+    <Logger name="org.camunda.community.zeebe.spec" level="trace"/>
 
-    <Logger name="io.zeebe" level="info"/>
+    <Logger name="org.camunda.community.eze" level="info"/>
 
     <Root level="error">
       <AppenderRef ref="Console"/>
