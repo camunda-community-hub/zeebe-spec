@@ -4,12 +4,12 @@ import org.camunda.community.zeebe.spec.SpecRunner
 import org.camunda.community.zeebe.spec.assertj.SpecAssertions.assertThat
 import org.junit.jupiter.params.ParameterizedTest
 
-@BpmnSpecRunner
-class BpmnSpecExtensionTest(private val specRunner: SpecRunner) {
+@ZeebeSpecRunner
+class SpecExtensionTest(private val specRunner: SpecRunner) {
 
     @ParameterizedTest
-    @BpmnSpecSource(specResources = ["exclusive-gateway-spec.yaml", "boundary-event-spec.yaml"])
-    fun `should pass the BPMN spec`(spec: BpmnSpecTestCase) {
+    @ZeebeSpecSource(specResources = ["exclusive-gateway-spec.yaml", "boundary-event-spec.yaml"])
+    fun `should pass the BPMN spec`(spec: ZeebeSpecTestCase) {
 
         val testResult =
             specRunner.runSingleTestCase(testcase = spec.testCase)
@@ -18,8 +18,8 @@ class BpmnSpecExtensionTest(private val specRunner: SpecRunner) {
     }
 
     @ParameterizedTest
-    @BpmnSpecSource(specDirectory = "specs")
-    fun `should run all specs in directory`(spec: BpmnSpecTestCase) {
+    @ZeebeSpecSource(specDirectory = "specs")
+    fun `should run all specs in directory`(spec: ZeebeSpecTestCase) {
 
         val testResult =
             specRunner.runSingleTestCase(testcase = spec.testCase)

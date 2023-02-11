@@ -41,12 +41,12 @@ import org.camunda.community.zeebe.spec.SpecRunner
 import org.camunda.community.zeebe.spec.assertj.SpecAssertions.assertThat
 import org.junit.jupiter.params.ParameterizedTest
 
-@BpmnSpecRunner
+@ZeebeSpecRunner
 class BpmnTest(private val specRunner: SpecRunner) {
  
     @ParameterizedTest
-    @BpmnSpecSource(specDirectory = "specs")
-    fun `should pass all tests`(spec: BpmnSpecTestCase) {
+    @ZeebeSpecSource(specDirectory = "specs")
+    fun `should pass all tests`(spec: ZeebeSpecTestCase) {
 
         val testResult = specRunner.runSingleTestCase(spec.testCase)
 

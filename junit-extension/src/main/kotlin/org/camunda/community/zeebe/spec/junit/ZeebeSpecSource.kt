@@ -8,8 +8,8 @@ import org.junit.jupiter.params.provider.ArgumentsSource
  */
 @Target(AnnotationTarget.FUNCTION)
 @Retention(AnnotationRetention.RUNTIME)
-@ArgumentsSource(BpmnSpecTestCaseArgumentsProvider::class)
-annotation class BpmnSpecSource(
+@ArgumentsSource(ZeebeSpecTestCaseArgumentsProvider::class)
+annotation class ZeebeSpecSource(
     val specResources: Array<String> = [],
     val specDirectory: String = ""
 )

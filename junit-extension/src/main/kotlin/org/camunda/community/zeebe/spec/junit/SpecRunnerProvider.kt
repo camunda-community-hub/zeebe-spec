@@ -30,7 +30,7 @@ class SpecRunnerProvider : ParameterResolver {
 
         val specRunnerAnnotation = extensionContext
             ?.element
-            ?.map { it.getAnnotation(BpmnSpecRunner::class.java) }
+            ?.map { it.getAnnotation(ZeebeSpecRunner::class.java) }
 
         val resourceDirectory: String = specRunnerAnnotation
             ?.map { it.resourceDirectory }

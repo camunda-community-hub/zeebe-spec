@@ -2,7 +2,7 @@ package org.camunda.community.zeebe.spec.junit
 
 import org.camunda.community.zeebe.spec.api.TestCase
 
-data class BpmnSpecTestCase(val testCase: TestCase) {
+data class ZeebeSpecTestCase(val testCase: TestCase) {
 
     override fun toString(): String {
         return "${testCase.name}${

@@ -1,13 +1,14 @@
 package org.camunda.community.zeebe.spec.junit
 
 import io.camunda.zeebe.client.ZeebeClient
-import org.camunda.community.zeebe.spec.SpecRunner
 import org.assertj.core.api.Assertions.assertThat
+import org.camunda.community.zeebe.spec.SpecRunner
+import org.camunda.community.zeebe.spec.assertj.SpecAssertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.params.ParameterizedTest
 
-@BpmnSpecRunner(verificationTimeout = "PT1S")
-class BpmnSpecExtensionInjectionTest(private val specRunner: SpecRunner) {
+@ZeebeSpecRunner(verificationTimeout = "PT1S")
+class SpecExtensionInjectionTest(private val specRunner: SpecRunner) {
 
     private lateinit var zeebeClient: ZeebeClient
 
@@ -28,8 +29,8 @@ class BpmnSpecExtensionInjectionTest(private val specRunner: SpecRunner) {
     }
 
     @ParameterizedTest
-    @BpmnSpecSource(specResources = ["spec-with-external-worker.yaml"])
-    fun `should inject Zeebe client and complete process`(spec: BpmnSpecTestCase) {
+    @ZeebeSpecSource(specResources = ["spec-with-external-worker.yaml"])
+    fun `should inject Zeebe client and complete process`(spec: ZeebeSpecTestCase) {
 
         assertThat(zeebeClient)
             .describedAs("Zeebe client should be injected")
@@ -38,9 +39,7 @@ class BpmnSpecExtensionInjectionTest(private val specRunner: SpecRunner) {
         val testResult =
             specRunner.runSingleTestCase(testcase = spec.testCase)
 
-        assertThat(testResult.success)
-            .describedAs(testResult.message)
-            .isTrue()
+        SpecAssertions.assertThat(testResult).isSuccessful()
     }
 
 }

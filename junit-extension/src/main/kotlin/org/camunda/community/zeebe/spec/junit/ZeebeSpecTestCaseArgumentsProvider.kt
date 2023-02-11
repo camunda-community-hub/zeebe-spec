@@ -12,19 +12,19 @@ import java.util.stream.Stream
 import kotlin.io.path.isDirectory
 
 
-class BpmnSpecTestCaseArgumentsProvider : ArgumentsProvider, AnnotationConsumer<BpmnSpecSource> {
+class ZeebeSpecTestCaseArgumentsProvider : ArgumentsProvider, AnnotationConsumer<ZeebeSpecSource> {
 
     private val specDeserializer = SpecDeserializer()
 
     private val specResources = mutableListOf<String>()
     private var specDirectory: String? = null
 
-    override fun accept(specSource: BpmnSpecSource?) {
+    override fun accept(specSource: ZeebeSpecSource?) {
         specSource?.let { source ->
             source.specResources.forEach { resource -> specResources.add(resource) }
             source.specDirectory.takeIf { it.isNotEmpty() }.let { specDirectory = it }
         }
-            ?: throw RuntimeException("annotation @BpmnSpecSource no found")
+            ?: throw RuntimeException("annotation @ZeebeSpecSource no found")
     }
 
     override fun provideArguments(extensionContext: ExtensionContext?): Stream<out Arguments> {
@@ -34,7 +34,7 @@ class BpmnSpecTestCaseArgumentsProvider : ArgumentsProvider, AnnotationConsumer<
             .map { resource -> specDeserializer.readSpec(resource) }
             .flatMap { spec ->
                 spec.testCases.map {
-                    BpmnSpecTestCase(
+                    ZeebeSpecTestCase(
                         testCase = it
                     )
                 }
