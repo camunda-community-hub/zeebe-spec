@@ -2,10 +2,7 @@ package io.zeebe.bpmnspec.builder
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.zeebe.bpmnspec.actions.*
-import io.zeebe.bpmnspec.api.Action
-import io.zeebe.bpmnspec.api.TestCase
-import io.zeebe.bpmnspec.api.TestSpec
-import io.zeebe.bpmnspec.api.Verification
+import io.zeebe.bpmnspec.api.*
 import io.zeebe.bpmnspec.api.dto.ElementInstanceState
 import io.zeebe.bpmnspec.api.dto.IncidentState
 import io.zeebe.bpmnspec.api.dto.ProcessInstanceState
@@ -44,15 +41,14 @@ class TestSpecBuilder {
 
 @TestSpecMarker
 class TestCaseBuilder(private val name: String, private val description: String?) {
-    private val actions = mutableListOf<Action>()
-    private val verifications = mutableListOf<Verification>()
+    private val instructions = mutableListOf<Instruction>()
 
     fun actions(init: ActionsBuilder.() -> Unit) {
         val actionsBuilder = ActionsBuilder();
 
         actionsBuilder.init()
 
-        actions.addAll(actionsBuilder.build())
+        instructions.addAll(actionsBuilder.build())
     }
 
     fun verifications(init: VerificationsBuilder.() -> Unit) {
@@ -60,11 +56,144 @@ class TestCaseBuilder(private val name: String, private val description: String?
 
         verificationsBuilder.init()
 
-        verifications.addAll(verificationsBuilder.build())
+        instructions.addAll(verificationsBuilder.build())
     }
 
+    // Actions ============
+
+    fun completeTask(jobType: String, variables: Map<String, Any> = emptyMap()) {
+        instructions.add(CompleteTaskAction(jobType, serializeToJSON(variables)))
+    }
+
+    fun cancelInstance(processInstance: String? = null) {
+        instructions.add(CancelInstanceAction(processInstance));
+    }
+
+    fun createInstance(
+        bpmnProcessId: String,
+        variables: Map<String, Any> = emptyMap(),
+        processInstanceAlias: String? = null
+    ) {
+        instructions.add(
+            CreateInstanceAction(
+                bpmnProcessId,
+                serializeToJSON(variables),
+                processInstanceAlias
+            )
+        )
+    }
+
+    fun publishMessage(
+        messageName: String,
+        correlationKey: String,
+        variables: Map<String, Any> = emptyMap()
+    ) {
+        instructions.add(
+            PublishMessageAction(
+                messageName,
+                correlationKey,
+                serializeToJSON(variables)
+            )
+        )
+    }
+
+    fun throwError(jobType: String, errorCode: String, errorMessage: String = "") {
+        instructions.add(ThrowErrorAction(jobType, errorCode, errorMessage));
+    }
+
+    // Verifications ============
+
+    fun verifyProcessInstanceState(
+        state: ProcessInstanceState,
+        processInstanceAlias: String? = null
+    ) {
+        instructions.add(ProcessInstanceStateVerification(state, processInstanceAlias))
+    }
+
+    fun verifyElementInstanceState(
+        selector: ElementSelector,
+        state: ElementInstanceState,
+        processInstanceAlias: String? = null
+    ) {
+        instructions.add(
+            ElementInstanceStateVerification(
+                state,
+                selector.elementId,
+                selector.elementName,
+                processInstanceAlias
+            )
+        )
+    }
+
+    fun verifyProcessInstanceVariable(
+        variableName: String,
+        value: Any,
+        selector: ElementSelector? = null,
+        processInstanceAlias: String? = null
+    ) {
+        instructions.add(
+            ProcessInstanceVariableVerification(
+                variableName,
+                serializeToJSON(value),
+                processInstanceAlias,
+                selector?.elementId,
+                selector?.elementName
+            )
+        )
+    }
+
+    fun verifyProcessInstanceVariables(
+        variables: Map<String, Any>,
+        selector: ElementSelector? = null,
+        processInstanceAlias: String? = null
+    ) {
+        variables.forEach { (key, value) ->
+            verifyProcessInstanceVariable(
+                key,
+                value,
+                selector,
+                processInstanceAlias
+            )
+        };
+    }
+
+    fun verifyNoProcessInstanceVariable(
+        variableName: String,
+        selector: ElementSelector? = null,
+        processInstanceAlias: String? = null
+    ) {
+        instructions.add(
+            NoProcessInstanceVariableVerification(
+                variableName,
+                processInstanceAlias,
+                selector?.elementId,
+                selector?.elementName
+            )
+        )
+    }
+
+    fun verifyIncidentState(
+        state: IncidentState,
+        errorType: String,
+        errorMessage: String?,
+        selector: ElementSelector? = null,
+        processInstanceAlias: String? = null
+    ) {
+        instructions.add(
+            IncidentStateVerification(
+                state,
+                errorType,
+                errorMessage,
+                selector?.elementId,
+                selector?.elementName,
+                processInstanceAlias
+            )
+        )
+    }
+
+
     fun build(): TestCase {
-        return TestCase(name, description, actions, verifications)
+        return TestCase(name, description, instructions)
     }
 }
 

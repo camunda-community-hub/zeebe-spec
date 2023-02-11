@@ -14,7 +14,7 @@ class BpmnSpecExtensionInjectionTest(private val specRunner: SpecRunner) {
     @BeforeEach
     fun `start external worker`() {
         zeebeClient.newWorker()
-            .jobType("a")
+            .jobType("external-worker")
             .handler { client, job ->
                 val valueOfX = job.variablesAsMap["x"] as Int
                 val newValue = valueOfX + 1

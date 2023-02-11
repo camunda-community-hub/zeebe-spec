@@ -55,12 +55,6 @@ class SpecTestRunnerTest {
         Assertions.assertThat(testResult.success).isFalse()
         Assertions.assertThat(testResult.message)
             .isEqualTo("Expected the element with name 'B'  to be in state 'COMPLETED' but was 'ACTIVATED'.")
-
-        Assertions.assertThat(testResult.testCase.verifications).hasSize(3)
-        Assertions.assertThat(testResult.successfulVerifications)
-            .containsExactly(testResult.testCase.verifications[0])
-        Assertions.assertThat(testResult.failedVerification)
-            .isEqualTo(testResult.testCase.verifications[1])
     }
 
     @Test
