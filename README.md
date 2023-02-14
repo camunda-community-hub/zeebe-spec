@@ -24,7 +24,7 @@ using the JUnit integration.
 ```
 <dependency>
   <groupId>org.camunda.community</groupId>
-  <artifactId>zeebe-spec.junit-extension</artifactId>
+  <artifactId>zeebe-spec-junit-extension</artifactId>
   <version>3.0.0</version>
   <scope>test</scope>
 </dependency>
