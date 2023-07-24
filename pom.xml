@@ -24,7 +24,7 @@
     <kotlin.version>1.9.0</kotlin.version>
     <eze.version>1.2.0</eze.version>
 
-    <junit.version>5.9.3</junit.version>
+    <junit.version>5.10.0</junit.version>
 
     <!-- release parent settings -->
     <version.java>11</version.java>
